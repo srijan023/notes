@@ -1,0 +1,46 @@
+* Learning Jargons
+** Jsx
+   Jsx is a javascript inside which we can write both javascript and xml (JavaScript XML)
+   We can run `npm build` which converts everything to html/css/js in a dist folder which is hosted in the website
+
+** Class vs ClassName
+
+** State
+   An object that represents the current state of the app. It represents the dynamic thing about you app (things that change). For example the like count
+   We change the state, react take the job of Re-rendering the website
+   @code javascript
+     const [count, setCount] = React.useState(0)
+   @end
+
+** Component
+   How a DOM element should render, given a state.
+   It is a re-useable, dynamic HTML snippet that change given a state
+   Example: A button component, it takes the count as the state and looks like \[Click 9\] where 9 is the count
+
+** Re-rendering
+   A state change triggers a re-render. A re-render represents the actual DOM begin manipulated when the state changes.
+   We define all the component once that takes the state, when the state changes, react takes care of re-rendering the website
+   In any dynamic website we target to minimize the re-rendering
+   It happens when:
+   - When the state connected with the component changes
+   - when the parent re-renders all the childern of it gets re-rendered
+
+*** How do we prevent these un-necessary re-renders
+    - Push the state variable down
+      This means that we try to make state specific to the component as much as possible
+    - Another way is to use React.memo
+      What this does is until the prop for the component changes, it is not re-rendered
+      /Check week6.1 code/
+
+** Wrapper components
+   Suppose we want to create a website which contains alot of cards, which look similar to one another.
+   Here we can create a wrapper `Card` component which can take the inner React component as input
+
+
+* Some good interview questions
+** Why can't we return two children from a react component
+   - because returning a single component helps with re-concilliation
+
+*** What is re-concilliation
+    process of determining which components need to be re-rendered on the DOM as the application grows
+

@@ -1,0 +1,59 @@
+@document.meta
+title: Authentication and Zod
+description:
+authors: creatio
+categories:
+created: 2024-07-09T00:17:17+0530
+updated: 2024-07-10T00:26:53+0530
+version: 1.1.1
+@end
+
+
+* Zod
+  it is a typescript first schema validation with static type interface
+
+  In simple words it simplifies the process of input validation, we define a schema and then validate the input based on that schema which is way better than writing all the validation code ourself.
+
+  @code javascript
+    const schema = z.array(z.number());
+    app.post("/health-checkup", function (req, res) {
+      const kidneys = req.body.kidneys;
+      const response = schema.safeParse(kidneys);
+
+      res.send({
+        response,
+      });
+    });
+  @end
+
+  Zod is an npm package so we need to install it using `npm` and then import it on the program as `const zod = require("zod")`
+
+** Creating an schema in zod
+   For the full content check out the zod official documentation page {https://zod.dev}[zod docs]
+
+   Example of a simple schema is as below
+
+   required features
+   {
+     email: string => email
+     password: at least 8 characters
+     country: "NP" or "US"
+   }
+
+   @code javascript
+    const mySchema = z.object({
+      email: z.string().email(),
+      password: z.string().min(8),
+      country: z.literal("IN").or(z.literal("US")),
+    });
+  @end
+
+** Validating the data with schema
+   @code javascript
+   const response = mySchema.safeParse(kidneys);
+   @end
+
+   The format of the response would depend on the validation but it would always have a key called `success` which would be either `true` or `false` based on the validation.
+
+
+

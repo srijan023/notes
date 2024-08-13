@@ -1,0 +1,192 @@
+@document.meta
+title: Foundation
+description:
+authors: creatio
+categories:
+created: 2024-06-13T23:14:35+0530
+updated: 2024-06-16T00:57:33+0530
+version: 1.1.1
+@end
+
+* Why Languages?
+  - everything resides on the storage unit
+  - anything that runs resides on the RAM
+  - computer only understands 0 and 1 therefore the data that resides are also bunch of 0s and 1s
+  - we write the program in high level language and then compiler or interpreter changes them to 0s and 1s
+  - browsers can only understand JavaScript therefore each programming lanugage has its specific use case
+
+** Compiler
+   - thingy that convert high level developer friendly code into 0s and 1s
+   - It first converts the hll to machine code which can later be run
+
+** Interpreter
+   - we write the code in high level language
+   - we run the code without compiling it to high level language
+   - we are still converting the code to 0s and 1s but it is done line by line while on compiler we convert the whole thing to a executable file
+
+      |-------------------------------------+----------------------------------------|
+      | Compiler                            | Interpreter                            |
+      |-------------------------------------+----------------------------------------|
+      | first need to compile and then run  | usually go run by run                  |
+      | doesn't compile if there's an error | can partially run until problem appear |
+      | example: C++, Java, Rust etc        | example: Python, JavaScript            |
+      |-------------------------------------+----------------------------------------|
+
+* Why learn JavaScript
+  - Browser can only under JavaScript (not technically true)
+  - Thanks to Node.js, we can also use JavaScript can also be used on backend
+  - JavaScript is a dynamically typed language
+  - Static typing provide us with more strict code while dynamically typed language allows developer to move fast
+  - Dynamically typed language can lead us to run time errors on large projects which is why TypeScript came into the picture
+
+* Single Threaded nature of JS
+  - we can't split the program into two different cores to decrease the run time
+  - therefore it is considered to be a bad langauge for scalable system, even if have capable hardware we can't use it with JavaScript
+  - /though there is way to do it/
+
+  - *Bounty Question 1*
+  @code JavaScript
+    let sum = 0;
+    for(int i = 0; i < 10000000000; i++){
+      sum += i;
+    }
+    console.log(sum)
+  @end
+  -- When we run this code it takes few seconds to get executed but if we check `htop` menu during that time neither of the CPU core are running at 100% which technically one should as JavaScript is single threaded and is supposed to run a single core why might be the issue
+  --- answer: It's the issue on `htop` and not the JavaScript
+
+* Callbacks
+  - functions can take another function as input
+
+* Date Class
+  - getMonth() methods -> 0 - 11
+  - getYear() -> current year - 1990
+  - getFullYear() -> 2024
+  - getMinutes()
+  - getSeconds()
+  - getHours()
+  - setFullYear()
+  - getTime() -> time in millisecond after 1970
+
+* JSON
+  - JavaScript Object Notation
+  - JSON.parse -> converts to JS object
+  - JSON.stringify -> converts to JSON
+
+* Objects
+  - `Object.keys(obj)` -> array of keys
+  - `Object.values(obj)` -> array of values
+  - `Object.entries(obj)` -> 2 dimensional array of keys and values `[[key1, value1], [key2, value2]]`
+  - `obj.hasOwnProperty("property")` -> if there is key with the name "property"
+  - `Object.assign({},obj,{newProperty: value})`
+
+* Async function
+  - synchronous mean together one after the other, sequential only one thing happens at a time
+  - opposite to synchronous happens in part, mutliple things are either context switching or running parallel
+  - even if JavaScript is single threaded we can use context switching and delegating for efficient processing
+  - *_Some asynchronous function_*
+  -- `setTimeout()`
+  -- `fs.readFile()`
+  -- `fetch()`
+  - if thread gets busy after delegating an async function then the program goes back to async function only after the thread is ideal
+  - for better visualization {latentflip.com/loupe}[follow this link]
+    @code JavaScript
+      console.log("Hello there");
+
+      function greetAfterTime(){
+        console.log("Hello every this is from async function");
+      }
+
+      setTimeout(greetAfterTime, 10000);
+
+      function sumTillN(n){
+        if(n < 0){
+          return;
+        }
+        let sum = 0;
+        for(let i = 0; i <= n; i++){
+          sum += i;
+        }
+        console.log(sum);
+      }
+
+      sumTillN(10);
+
+      console.log("Last line of the program");
+    @end
+
+* Promises
+  - they are the syntactical sugar to make code better, under the hood it still uses callbacks queues
+  - any promise's first argument is a function which takes an argument called resolved.
+  - promise has three states `pending, resolved and rejected`
+  - promises prevents us from callback hell (imagine having there are 3 fetch commands to be run, and they are chained such way that the calling of one depends on the earlier result)
+
+  @code JavaScript
+    var d = new Promise(function (resolve) {
+      // this is the place where async stuff happens
+      setTimeout(() => {
+        resolve("foo");
+      }, 1000);
+    });
+
+    function callback(data) {
+      console.log(d);
+      console.log(data);
+    }
+
+    // what is the initial state of the promise
+    console.log(d); // PENDING
+
+    // if resolved then call callback()
+    d.then(callback); // RESOLVED
+  @end
+
+  @code JavaScript
+    const fs = require("fs");
+
+    function withoutPromise(cb){
+      fs.readFile("a.txt", "utf-8", function (err, data) {
+        cb(data);
+      });
+    }
+
+    function ReadFileWrapper() {
+      return new Promise(function (resolve) {
+        fs.readFile("a.txt", "utf-8", function (err, data) {
+          resolve(data);
+        });
+      });
+    }
+
+    function onDone(data) {
+      console.log(data);
+    }
+
+    withoutPromise(onDone);
+
+    ReadFileWrapper().then(onDone);
+
+  @end
+
+* Async Await
+  - syntactical sugar over Promises
+
+  @code JavaScript
+    function myOwnAsyncFunction() {
+      return new Promise(function (resolve) {
+        setTimeout(() => {
+          resolve("hi there");
+        }, 3000);
+      });
+    }
+
+    async function main() {
+      let value = myOwnAsyncFunction();
+      console.log(value);
+
+      let value2 = await myOwnAsyncFunction();
+      console.log(value2);
+    }
+
+    main();
+  @end

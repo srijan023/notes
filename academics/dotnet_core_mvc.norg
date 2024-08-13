@@ -1,0 +1,714 @@
+@document.meta
+title: dotnet_core_mvc
+description: Creating ASP.NET Core MVC Applications
+authors: creatio
+categories: [
+  dotnet,
+  academics
+]
+created: 2024-05-30T01:59:26+0530
+updated: 2024-06-04T02:36:49+0530
+version: 1.1.1
+@end
+
+* .NET Core Overview
+  - new version of .net framework (free)
+  - cross platform
+  - -can develop mobile, desktop, web, cloud and microservices (??? Search about these ???)-
+  - written from scratch
+  - additional featrues are provided by nuget packages 
+
+* Why .NET Core
+  - .net framework only runs on windows 
+  - -search other options-
+  
+** Features of .NET core
+   - Supports multiple platform
+   - Fast (we can only include packages and services which we require)
+   - IoC Container (automatic dependency injection)
+   - Integration with modern UI Frameworks
+   - Hosting (can be hosted on multiple platforms such as AWS Apache, .NET was dependent on IIS)
+     -/what is IIS though/-
+   - Code sharing (code written in .NET core can be shared across other .NET frameworks such as mono or the original)
+   - Side-by-Side app versioning (we can have two versions of .NET framwork running at the same time)
+   - Smaller development footprint
+   - Support for multiple languages
+   - CLI Tools -more to add as we learn-
+
+
+
+  @table
+   |--------------------------------------------------------+--------------------------------------------------------------------------------------------|
+   | ASP.NET core                                           | .NET core                                                                                  |
+   |--------------------------------------------------------+--------------------------------------------------------------------------------------------|
+   | Open source and cross-platform                         | Open source and cross platform                                                             |
+   |--------------------------------------------------------+--------------------------------------------------------------------------------------------|
+   | It is a run time to run application built on top of it | It is an web framework to develop web                                                      |
+   |                                                        | applications, backends and IoT application which runs on top of .NET Core or .NET Framwork |
+   |--------------------------------------------------------+--------------------------------------------------------------------------------------------|
+  @end
+
+* Setting up the environment
+** wwwroot Folder
+   - treated as the web root directory
+   - static files can be stored here and accessed through static path to the root
+   - only files on wwwroot can be served over http request
+   - we can access static files through url by /`http://localhost:<port>/css/app.css`/
+   - we need to include middleware for serving static files in the configure method 
+
+*** Renaming wwwroot folder
+    - we can rename it to any other name such as content
+    - We use `UseWebRoot()` to configure the root folder in the `Main()` method of Program class
+    @code cs
+    public class Program{
+      public static void Main(string[] args){
+        var host = new WebHostBuilder().useKestrel().UseContentRoot(Directory.GetCurrentDirectory()).UseWebRoot("Content").UseIISIntegration().UseStartup<MyStartup>().Build();
+        host.Run();
+      } 
+    }
+    @end
+
+** ASP.NET Core - Program.cs
+
+   @code cs
+   // pre dotnet 6 it was done on ConfigureServices()
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+// this is the dependency injection for having MVC architecture requirements such as registring classes and services such as a controller class for handling HTTP requests and responses, Views for razor view engine and services and Routing  
+builder.Services.AddControllersWithViews();
+
+var app = builder.Build();
+
+// pre dotnet 6 it was done on Configure()
+// Configuring middleware pipeline
+
+// if app is not on development
+if (!app.Environment.IsDevelopment())
+{
+    // redirect to ... path in case of error
+    app.UseExceptionHandler("/Home/Error");
+    // hsts is http strict transport security which prevents from man in the middle attack
+    app.UseHsts();
+}
+
+// redirecting to https for more security
+app.UseHttpsRedirection();
+
+// using static files from wwwroot
+app.UseStaticFiles();
+
+// enable routing
+app.UseRouting();
+
+// enable authorization
+app.UseAuthorization();
+
+// setting up default router
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// running the application for handling HTTP requests
+app.Run();
+   @end
+
+** Controller
+   - it is a class 
+   - Controller is a middle man between view and the model
+   - methods in controller is a bridge between browser (the user) and the application
+   - therefore the method of controllers are called {** actions}
+   - It is usually placed in the controller folder on the root path of the project
+   - Inherited from `Asp.NetCore.Mvc.Controller` 
+   - Name of the class usually end with the name Controller such as "HomeController"
+
+*** Features of a controller
+    - is able to return view or partial views
+    - controller allows you to access HTTP related information like the query string
+    - handle the request (from the user)
+    - builds the modules (executes the application logic and builds the modules)
+    - sends the result (must return the result either in HTML/JSON/XML or whatever format requested by the user)
+
+** Actions
+   - what is action? => {** controller}
+   - the actions return something to the browser
+   - browsers work on urls and therefore we need to change the url such that it triggers certain controller and action inside that controller to make it work
+   - this is also called routing
+   - with the help of attributes we can create two actions with the same name, one is triggered on the post request and one is triggered on the get request 
+   @code cs
+   [HttpPost]
+   public IActionResult Edit(Product product){
+     product.Save();
+     return Content("Product Updated");
+   }
+
+   [HttpGet]
+   public IActionResult Edit(){
+     return View();
+   }
+   @end
+
+*** Action results types
+    - return types for an action
+    - these are obtained from `Microsoft.Asp.NetCore.Mvc` class
+    - several different options 
+    -- View()
+    --- Instance of ViewResult class which implements IActionResult interface
+    --- This is automatically transferred to the browser
+    -- Content()
+    --- returns string as plain text to the browser (client)
+    -- PartialView()
+    --- returns partial view to the client
+    -- File()
+    --- returns the content of specific file to the client 
+    -- Json()
+    --- returns a JSON() request to the client
+    -- Redirect() and RedirectPermanent()
+    -- StatusCode()
+    --- Returns a custom status code to the browser
+    @code cs
+    public IActionResult Details(int id){
+      Product product = GetProduct(id);
+      if (product != null)
+        return View(product) // view
+      return NotFound(); // status
+    }
+    @end
+
+** Views
+   - handles app's data presentation and user interaction 
+   - it includes HTML template with embedded Razor markup (code that interacts with HTML template)
+   - the extension is `.cshtml` which includes C# as language for razor markup
+   - stored inside folder named with controller name
+   - Home folder might be present in Controller as well as View and in View it may have file which includes the view for About, Contact and Index webpages 
+   - Layouts can be used for decreasing code repetition which usually contains the header and the footer
+   - Partial views also reduce code repetition
+*** How to create partial views?
+    - They are placed inside the views folder and inside an folder named shared
+    - Their name usually starts with an `_` (underscore)
+
+    Creating a _Greeting.cshtml partial view in Shared folder of Views
+    @code html
+    <div>Hello world</div>
+    <div>Today is @DateTime.Now.ToString()</div>
+    @end
+
+    Using the created Partial View in Index view
+    @code html
+    @{
+    ViewData["Title"] = "Index";
+    }
+
+    <div class="text-center">
+      <h1>Hello world</h1>
+      <!-- the await is required for the async nature of Html.PartialAsync()--> 
+      <!--Notice we don't need to specify the full length to the path-->
+      @await Html.PartialAsync("_Greeting")
+    </div>
+    @end
+
+*** Passing data into views (partial or common)
+**** use a strongly typed Model
+    -- more robust method
+    -- advantage of strongly typed data
+    -- validity is checked during compile time
+    -- we can access data using the `.` (dot) operator
+
+     - first create a model inside the Model folder (we can create two different model one for view logic and another for business logic)
+     - now in the controller create the object of that model and pass it to the view
+
+     The model
+     @code cs
+     namespace Trial.Model;
+     public class address
+     {
+         public string? country { get; set; }
+         public string? state { get; set; }
+         public string? city { get; set; }
+         public string? street { get; set; }
+         public string? postalcode { get; set; }
+     }
+     @end
+
+
+****  use a `ViewDataDictionary`
+     - these are loosely typed collection of data
+     - these collection can be referenced through either the ViewData or ViewBag properties in controllers and views 
+     - they are resolved at runtime, are more error prone and therefore not preferred
+     - ViewBag is a wrapper around ViewData which allows to assign value using a dot (.) and does not require casting operator and ViewData is a dictionary of weakly typed object
+     - ViewBag is not available on razor pages, these are pages that donot have separate view and controller rather on same page 
+
+      |-------------------------------------------------------------------+------------------------------------------------------------------|
+      | View Data                                                         | View Bag                                                         |
+      |-------------------------------------------------------------------+------------------------------------------------------------------|
+      | Derived from view data dictionary                                 | Derived from dynamic view data                                   |
+      | Allows dictionary properties such as ContainsKey, Add, Delete etc | Allows for the creation of dynamic properties using dot notation |
+      | Casting is required for values other than strings                 | No casting is required                                           |
+      | Keys are strings and therefore space is allowed                   | Simpler to check null values @ViewBag.Person?.Name               |
+      |-------------------------------------------------------------------+------------------------------------------------------------------|
+
+
+     The controller
+     @code cs
+     // passing data as ViewData Attribute
+     [ViewData]
+     public string? Value { set; get; }
+     public IActionResult Privacy()
+     {
+         // defining the value for ViewData Attribute
+         Value = "This is some random value";
+         // passing as a model
+         Address address = new Address()
+         {
+             Country = "Nepal",
+             State = "Lumbini",
+             City = "Butwal",
+             Street = "Devinagar",
+             PostalCode = "37041"
+         };
+
+         // passing as viewdata
+         ViewData["my_addr"] = new Address()
+         {
+             Country = "US",
+             State = "New York",
+             City = "New York City",
+             Street = "Central Park",
+             PostalCode = "10023"
+         };
+
+         // passing as viewbag
+         ViewBag.my_data = new Address()
+         {
+             Country = "US",
+             State = "New York",
+             City = "New York City",
+             Street = "Central Park",
+             PostalCode = "10023"
+         };
+
+         return View(address);
+     }
+     @end
+
+     The view
+     @code cs
+     @{
+         ViewData["Title"] = "Privacy Policy";
+     }
+     <!--This is the namespace.className to the address model-->
+     @model Trial.Model.Address;
+
+     @{
+       var address = ViewData["my_addr"] as Trial.Model.Address;
+       var value = ViewData["Value"];
+     }
+     <h1>@ViewData["Title"]</h1>
+     <h1>@Model.City</h1>
+     <h1>@address.City</h1>
+     <h1>@value</h1>
+     <h1>@ViewBag.my_data.Country</h1>
+     @end
+
+*** Why use Views
+    - separation of concern
+    - loosely coupled system
+    - easier testing
+    - better code organization
+
+*** Creating a view
+    - Create a folder with the name same as the controller inside the View folder
+    - create a file with the name of the view and extension `.cshtml`
+    - if the view is a shared view create a separate folder inside the View folder and put it there {# How to create partial views?}
+    - razor code starts with `@` and razor blocks are enclosed with `{}`
+
+*** How Controller specify views
+    - Controllers return ViewResult which are the type of ActionResult
+    - /ViewResults can be returned directly but this is not common/
+    - There are helper method in View() provided by Controller 
+    -- explicitly return the view `return View("Orders")`
+    -- pass a model to a view `return View(Orders)`
+    -- both model and view `return View("Orders", Orders)`
+
+**** Discovering the view
+    - return View() is same as return View("About") if you are doing this from the controller named About
+    - We can pass in the absolute path or the relative path in place of the name of the view
+    - If the file named view is not found in the View folder Shared folder is looked
+
+* Razor Syntax
+  - It is a language developed by microsoft on 2011 and released along with ASP.NET MVC Version3
+  - Advantage: We can write server side code (in C# or VB) along with client side HTML
+  - variables can be referenced with the @ symbol
+    example
+  @code html
+  <p> Hello, world my name is @name and the current date is @DateTime.Now.ToString()</p>
+  @end
+  - writing conditional statement is pretty easy as well
+  @code html
+  @if(Request.QueryString["test"] != null){
+    <p> Lots of markup here.. </p>
+  <p> Test value: @Request.QueryString["test"] </p>
+  }
+  @end
+  - These razor values are converted to html encoding automatically
+
+** Basic Razor Syntax
+*** HTML Encoding
+    - Process the html and enterpret in the browser, for that we use `Raw()` method on the `HTML` class
+    @code html
+    @{
+        ViewData["Title"] = "Index";
+        var helloWorld = "<b>Hello world</b>";
+    }
+    <p>@helloWorld</p>
+    <p>@Html.Raw(helloWorld)</p>
+    @end
+
+*** Explicit Expression
+    - to make the parser easier to understand our razor syntax we wrap them around with parenthesis ()
+    @code html
+    <p> Hello this is me @(name.SubString(0,5)) and I am @(12+12) years old </p>
+    @end
+
+*** Multi-statement Razor block
+    - for a multi-statement razor block we close the block with {}
+    @code html
+    @{
+      ViewData["Title"] = "Index";
+      var helloWorld = "<b>Hello world</b>";
+    }
+    @end
+
+*** Html tags and plain text inside razor block
+    - text inside code block wrapped in html is treated as a html component and rendered accordingly
+    - if we want to have plain text without html tag we can prepend @: on that text
+    @code html
+    @{
+      var text = "This is a variable value";
+      <p>This is a paragraph and inside it we have @text</p>
+      @:This is a plain text without html tag
+    }
+    @end
+
+*** Server side comments
+    There are two ways to do this
+**** Razor syntax comments
+     @code html
+      @*
+        Entire block as a comment
+      *@
+     @end
+
+**** C# Syle comments
+     They can only be used once you are inside razor block
+     @code html
+     @{
+       <h1>We are testing comments</h1>
+       // this is a regular c# style comment
+       @*
+         <h2>This is another html tag but wrapped around comment</h2>
+       *@
+     }
+     @end
+
+*** Variables
+    We know pretty much everything we need to know about variables by now
+
+*** If Statements
+    @code html
+    @if (age < 20){
+      <p>We are having fun</p>
+    }else{
+      <p>We are screwed</p>
+    }
+    @end
+
+*** Loops
+
+* Understanding Tag helpers
+  - they enable server side code to creating and rendering HTML elements 
+
+** Adding tag helpers
+   @code cs
+    // Making available the default tag helpers 
+    @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+   @end
+   - the * symbols means a wildcard syntax meaning all the tag helpers from that binary are allowed
+   - this is found in `/Views/_ViewImports.cshtml` so all pages inside of Views folder will inherit it
+   - we can specify our own binary as @addTagHelper *, <projectName>
+   - if we want a specific tag helper assume `EmailTagHelper` then we can do @addTagHelper <projectName>.TagHelpers.EmailTagHelper, <projectName>
+
+** Removing tag helpers
+   - Removing tag helpers work the same way we only change @addTagHelper to @removeTagHelper
+
+** Controlling the scope of the tag helpers
+*** By create an extra folder
+    - If we create a new folder Home such that the new structure is `/Views/Home/_ViewImports.cshtml` and use @addTagHelper there we scope is limited to Home folder
+    - If that file is left empty no changes would take place
+
+*** Opting out individual elements
+    - We can remove the impact of tag helpers using the opt-out character (!) 
+    @code html
+    <!span asp-validation-for="Email" class="text-danger"></!span>
+    @end
+    - here the validation for email is not applied to span
+    - it should be applied on both opening and closing tag
+
+*** Making useage of tag helpers more explicit
+    - We can specify prefix for the support of enabling tag helpers  
+    - if we write @tagHelperPrefix th: in our _ViewImports.cshtml file then only the elements that start with th: will be allowed to use our tag helpers
+    @code html
+    <th: label asp-for="Password"></th: label>
+    @end
+
+*** -Self Closing Tag Helpers-
+
+** Some available tag helpers
+   - asp-for (helps in form creation for specifying the type of input and also for label) 
+   - asp-controller (Home)
+   - asp-action (Index) can also be used with anchor tags
+   @code html
+   <form asp-controller="Home" asp-action="Index">
+     <!--This code translates to-->
+   <form method="post" action="/Home/Index">
+   @end
+   - -validation-for-
+   - -validation-summary-
+
+* Model
+  - It is the part of the MVC architecture that represents the state of the application
+  - It is the place where we keep our business logic
+  - Models does not depend on the Controller or the View but both View and Controller depends on the model
+** View Models
+   - if we want to create a view model for a specific situation (when we have two models one for the business logic and another for view)
+   - there might be a prefix attached to it such as `EditUserViewModel`
+*** Conditions when we want view models
+    - when we want to pass data to a view
+    - when we want to pass data from more than one model in view
+    @code cs
+    public class EditItemViewModel{
+      public Model1Type Model1 {get; set;} 
+      public Model2Type Model2 {get; set;}
+    }
+    @end
+    - to simplify the existing model (remove password)
+    - to extend the exsiting model (add date time)
+    @code cs
+    public class ExtendedUserInfoViewModel : WebUser{
+      public TimeSpan LoginDuration {
+        get { return DateTime.Now - this.LastLogin}
+      }
+    }
+    @end
+
+** Model Binding in ASP.NET Core
+   - model binding is nothing but taking out information from the HTTP request and providing it to the controller
+   - The information may be of simple type like integer or string or a complex type
+   - There are three methods of model binding 
+     1. By form submission (check the current example)
+     2. By routing (check the current example)
+     3. By query string (check the ADO project)
+
+** Data Annotations
+*** Types of Data Annotations
+**** Model Validation
+     - `[Requried]`
+     - `[StringLength(25)]`
+     - `[StringLength(50, MinimumLength=3)]`
+     - `[Range]`
+     - `[Comapre]` 
+     @code cs
+     [Compare("MailAddressRepeated")]
+     public string MailAddress{get; set;}
+     public string MailAddressRepeated{get; set;}
+     @end
+     - `[RegularExpression("<reg>")]`
+
+** Routing
+   - two jobs
+   -- map the incoming url to controller action 
+   -- generate the outgoing url corresponding to controller action (asp-controller and asp-action to / / )
+
+*** Working of routing
+    - get the http request from previous middleware
+    - parse the URL to check of routing path
+    - locate the matching route in the routing collection
+    - if route found -> go to route handler
+    -- else goto next middleware
+
+*** Terminologies
+    - route: similar to a roadmap, ASP.NET core uses route to get to the controller action, defined under Microsoft.AspNetCore.routing namespace
+    - route-collection: in-memory collection of routes, routes added to it when the application starts, routing module looks for the incoming URL to match on the routing collection
+    - route-handler: decides what to do with the route, routing engine finds the route and pass the route to route handler for further processing, route handler implements IRouteHandler interface
+
+**** MVCRouteHandler
+     - default route handler for AspNetCore.MVC
+     - it is already defined in program.cs when we create an mvc project but we can also define our own route handler
+     - it comes from Microsoft.AspNetCore.Mvc namespace
+     - it is responsible for invoking the controller factory associated with the route, the controller than calls the appropriate action and complete the request
+
+**** Setting up routes
+***** Convention-based routing
+      - This type of routing is based on the convention defined under the Program.cs file
+      @code cs
+      app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}"
+      )
+      @end
+
+      - Routing is done by url which has different segments either constants or routing parameters (controller and action)
+      -- admin/controller/action => admin = constant
+      - there can also be optional parameters like id
+      - `www.example.com/home/index/2` parse this 
+      - why are default parameters defined what if the url is `www.example/product` only -> product/index is activated
+      - if no routing is matched
+        @code cs       
+        if(!app.Environment.IsDevelopment()){
+          app.UseExceptionHandler("/Home/Error");
+        }
+        @end
+
+*****  Attribute routing
+       - The location for the definition is different, the routes are defined in the controller themselves
+       - routing is distributed and therefore might be difficult to get a grasp without opening each controller file
+       - it is more flexible for complex routes
+       - easier to maintain as each route is individually defined
+       - each action has to be indiviually binded to a route
+       @code cs
+       [RoutePrefix("products")]
+        public class ProductsController : Controller
+        {
+            [Route("")]
+            public ActionResult Index()
+            {
+                return View();
+            }
+
+            [Route("details/{id:int}")]
+            public ActionResult Details(int id)
+            {
+                return View();
+            }
+
+            [Route("category/{categoryName}")]
+            public ActionResult ByCategory(string categoryName)
+            {
+                return View();
+            }
+        }
+       @end
+**** -Multiple Routing-
+
+* Web API Application
+
+
+* Dependency Injection
+  Dependency injection is a techinque in which the object receives other object that it depends on which are also called dependencies, rather than an object creating its dependencies itself they are provided from outside usually by frameworks or container. 
+** Advantages
+   - Loosely coupling
+   - Easier unit testing
+   - Easier to maintain
+
+** Dependency injection in DOTNET
+*** Built-in IOC Container
+    - defined under `Microsoft.AspNetCore.Mvc` namespace
+    - provides basic features for additional featues such as auto-registration, decorators third party container may be required
+    - there are 2 types of services in IOC Container
+    -- framework services
+    --- features provided by the core framework itself such as IApplicationBuilder, IHostingEnvironment, ILoggerFactory etc.
+    -- application services
+    --- these are services which a developer can develop and register to the system such as IEmailSender, ICacheService, ICustomerService etc.
+
+*** Registering the application service
+    @code cs
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Register framework services (some are registered by default)
+    builder.Services.AddLogging();
+    builder.Services.AddOptions();
+    builder.Services.AddHttpContextAccessor();
+
+    // Register application services
+    builder.Services.AddTransient<IMyTransientService, MyTransientService>();
+    builder.Services.AddScoped<IMyScopedService, MyScopedService>();
+    builder.Services.AddSingleton<IMySingletonService, MySingletonService>();
+    @end
+
+*** Service Lifetime
+    IOC container would create an instance of the service that would last what time
+    - Singleton
+    -- single instance of the service throughout the application lifetime (example logger)
+    - Transient 
+    -- every time you ask for (small size, utility class such as a state maintainer)
+    - Scoped
+    -- per http request (meaning for a single user connection) and shared in a single request (exmaple can be a database context object)
+
+*** Methods of Dependency Injection
+**** Contructor injection
+     - injected dependencies are available during the initialization of the class 
+     - this is the most preferred method 
+     - promotes dependencies immutablity
+     @code cs
+     public class MyHomeController: Controller {
+       private readonly ILogger _myLogger;
+       public MyHomeController(Ilogger logger){
+         _myLogger = logger;
+       }
+       public IActionResult Index(){
+         _myLogger.logData()
+       }
+     }
+     @end
+
+**** Action Method injection
+     - injected dependencies are set through the public Action methods
+     - less common than the constructor method
+     - used if the dependency is only required for the particular action method
+     @code cs
+     public IActionResult Index([FromService] Ilogger myLogger){
+       myLogger.logData()
+       return View();
+     }
+     @end
+
+**** Property injection
+     - injected dependencies are set through public properties
+     - less used and often not preferred
+     - does not ensure immutablity
+     @code cs
+       [FromService]
+       public Ilogger _myLogger {get; set;}
+     @end
+
+** IOC Container Intefaces and Classes
+*** Interfaces
+    1. IServiceCollection
+    - collection of service descriptors used to register services 
+    - key methods 
+    -- `AddTransient<TService, TImplementation>()`
+    -- `AddScoped<TService, TImplementation>()`
+    -- `AddSingleton<TService, TImplementation>()`
+       -> definition class -> IServiceCollection
+
+    2. IServiceProvider
+    - used to resolve service at runtime
+    - helps in retrieving the service instance
+      -> definition class -> ServiceProvider
+    @code cs
+    private readonly IMyService _myService;
+    public MyController(IServiceProvider serviceProvider){
+      _myService = serviceProvider.GetService<IMyService>();
+    }
+    @end
+
+    3. IApplicationBuilder
+    - vital interface used to configure application request pipeline
+    - pipeline includes middleware components and dependency injection
+      -> definition class -> ApplicationBuilder
+
+    /Interfaces themselves can't implement the methods they can only declare those methods and create a template and therefore for their implementation we need classes these are all the default classes for the provided interfaces/
+    
+
+
+

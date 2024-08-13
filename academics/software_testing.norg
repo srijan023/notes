@@ -1,0 +1,178 @@
+@document.meta
+title: software_testing
+description:
+authors: creatio
+categories: [
+  software_engineering,
+  academics,
+  csit
+]
+created: 2024-05-28T16:12:57+0530
+updated: 2024-06-17T16:20:31+0530
+version: 1.1.1
+@end
+
+* Introduction
+  - Why?
+  -- to show that program fullfils all the requirement, for custom software -> one test case for each features, for generic softare, test case for each feature and also combination of different test cases of different program structure (validation testing)
+  -- to find the issues on the program before it is released (defect testing)
+  - */Testing can only show the presence of errors and not their absence/* - Edsger Dijkstra
+  - Part of verificiation and validation
+** Verificiation vs Validation
+   - Verification - Are we building the product right ?
+   - Validation - Are we building the right product ?
+   - Done to bring confidence in the user which also depends on
+   -- software purpose (critical system -> need to be more reliable -> more testing)
+   -- User expectation (initial versions might be buggy but later version need to be stable so more testing later)
+   -- Marketing environment (if environment is competatiive product has to be cheaper and more reliable)
+   - Static V & V (Donot require testing)
+    - review of system requirements
+   -- software architecture
+   -- UML design
+   -- Database schema
+*** Advantage of software inspection over testing
+    - Incomplete system can be checked
+    - Errors may hide errors in testing which is not the case in inspection
+    - Other several factors such as (system architecture, programming style, algorithms used, model of the system, compatability) etc can be tested
+      /Studies show that more errors and defects are detected through inspection rather than testing, however it can't replace testing mainly in small companies where it is tough to dedicate a separate team for inspection/
+** Testing
+   - Test automation
+   -- test data can be generated automatically but not test cases
+   -- test runs can be automated
+   -- test cases test for expected results automatically and therefore the developer or the tester does not have to compare two data
+
+*** Stages of testing
+    - Development testing - what we do
+    - Release testing - valdation
+    - User testing - acceptance testing
+
+* Development testing
+  - either done my developer themselves or developer/tester pair or by an entire team in critical system
+  - Three levels of testing
+  -- unit testing - object level
+  -- component testing
+  -- system testing
+  - some overlapping with debugging
+
+** Unit testing
+   - testing method or object classes
+   - calls to functions with different parameters
+   - objectives:
+   -- test all operations associated with an object (test method)
+   -- set and check value of all attribtues of the object (test attributes)
+   -- put all the objects through all possible states
+   - unit testing is difficult if there is generalization and inhertiance involved
+   - unit testing must be automated as much as possible (JUnit popular unit testing framework)
+   -- settin gup the test with inputs and outputs
+   -- calling up the methods or the function
+   -- check if the output of the function call is same as the expected output
+
+*** Choosing unit tests
+    - can't do every because it is expensive and time consuming
+    - test should be effective meaning
+    -- it must show system does the right thing
+    -- it should expose the bugs in the system
+
+    There are two possible ways to do so
+    - Partition testing
+    -- check out the figure of 216 and write test case for each partition (2 one from the center and one from the edge of the partitions (usually atypical))
+    -- grayed region is invalid
+    -- there might not always be 1:1 relation between input and output
+    - Guideline-based testing
+    -- we test based on the guidelines provided on the documentation or program specificiation
+    -- this is also called black box testing as we don't know how the system works
+    -- partition the documented sets of inputs and then test for atypical cases
+    -- _some rules to follow_
+    --- chose inputs to force generate all errors
+    --- repeat same inputs or series of inputs numerous times
+    --- inputs to cause buffer overflow
+    --- force invalid output
+    --- force results to be too small or too large
+
+** Component testing
+   Common component testing
+   - parameter interfaces
+   - messages interfaces
+   - share memory interfaces
+   - procedural interfaces (methods encapsulated that can be used by different components)
+
+   Possible errors
+   - interface misuse (parameters wrong or wrong order or number of parameters)
+   - interface misunderstanding (parameters passed to the components do not meet the requirements such as passing unordered list to a binary search)
+   - timing errors (accessing out of date information in shared memory system)
+
+   Why is interface testing difficult
+   - it may require some specific testing such as generating a big enough queue or any other data structure
+   - fault in one components parameter passing can be obtained on later form of computation on some other component
+
+   Guidelines
+   - Call every external component using every interface possible
+   - Pass null as pointer when passed accross components
+   - Use stress testing (specially in real time system)
+   - Make several components use same shared memory at the same time
+
+   /Inspection are sometimes better solution than interface testing/
+
+** System testing
+   differences from component testing
+   - complete system after integrating the components (off the shelf or developed) are integrated
+   - sometimes it is done by different team without the involvement of developers and designers
+
+   integration of components exposes the interface faults.
+   component developers may have introduced bugs during the developement of interfaces
+   interface faults should be tried to exploit
+
+   first create sequence diagram of the system at hand or use one from the documentation -> why to get idea about how the system should work
+   exhaustive system testing is impossible so some of guidelines are:
+   1. all functions from menu are tested
+   2. combination of functions used by same menu are tested
+   3. parameters are passed that might be incorrect to check handling
+
+* Test driven development
+  - develop the code incrementally along with the test for that code
+  - pass test move to next increment
+  - first identify functionality to develop -> write test -> run test -> write code -> run test -> if pass move to next
+    _advantages_:
+    1. code coverage
+    2. regression testing ?? chat gpt this
+    3. simplified debugging
+    4. system documentation
+
+* Release testing
+  - separate team from system testing
+  - while system testing is defect testing this is validation testing
+  - usually a black box testing aka implementation testing
+
+** Requirement based testing
+   - check the requirement docs and check if every requirement is met
+     give an example for a special feature
+
+** Scenario testing
+   - edge case testing
+   - what if cases
+   - take a user case and run through all the job a user can perform on that system
+   - to increase the trust on stake holders
+
+** Performance testing
+   - ensure system and intake intended load
+   - running series of tests until system performance become unacceptable
+   - if we can categories the operaitons into different groups (A, B and C suppose) and if A operations are much performed in real case then stress testing must involve A more
+   - strees testing
+   -- if a system holds 300 req, (recommended) start below 300 and gradually increase until system fails
+   - helps to identify
+   -- the nature of failure (are there any potential data loss or corruption)
+   -- any underlying bugs in the system that may occur on multiple operations being performed
+
+* User testing
+ - tests can't be as reliable as a real world user
+  - _Types_
+  -- alpha test (user and developers work together)
+  -- beta test (beta testers are provided or sometimes publicly available - incomplete system though)
+  -- acceptance test
+  --- define test criteria (with the stakeholder)
+  --- plan test criteria (hardware and system requirements)
+  --- derive test criteria (writing the tests)
+  --- run test criteria
+  --- negotiate test results
+  --- accept or decline (not simple)
+

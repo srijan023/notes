@@ -1,0 +1,175 @@
+* Side effects
+   In react, the concept of the side effects encompasses any operations that reach outside the functional scope of the React component. These operations can affect other component, interact with the browser, or perform asynchronous data fetching
+   Some of its examples are:
+   - set timeout
+   - fetch
+   - set interval
+   - document.getElementById.innerHTML=""
+
+* Hooks
+  Hooks in react are functions that allow you to "hook into" react state and life cycle features from function components.
+
+    Hooks are a feature introduced in React 16.8 that allow you to use state and other React features without writing a class. They enable functional components to have to access to stateful logic and lifecycle features, which were previously only possible in class components. This has led to a more concise and readable way of writing components in react.
+
+** What are life cycle features
+   What is going on with the component
+   This is the problem solver for writing `fetch` directly
+   - `onComponentMount()`
+   - `onComponentUnMount()`
+
+** Use State
+   - simplest of all
+   - lets us describe the state of the application
+   - whenever state updates, it triggers a re-render which finally results in DOM update
+
+** Use Effect
+   It allows us to do side-effects in function component like data fetching, subscriptions, manually chaning the DOM which can't be done during rendering
+   It replaces:
+   - `componentDidUpdate`
+   - `componentDidUnMount`
+   - `componentDidMount`
+
+   Example: You are a F1 driver, we either take the pit stop when needed or after a certain interval. *Making a pit stop is a /side-effect/ and the conditions are the /arguments/*
+
+   It takes in two parameter,
+   1. logic to run
+   2. Dependency array
+   -- when should the callback function run
+   -- it takes state variables as input
+
+   @code javascript
+     useEffect(()=>{
+       // pitstop
+       fetch("url").then(async function(res){
+         const json = await res.json();
+         setTodos(json.todos)
+       })
+     },[]//conditions)
+  @end
+
+   /If we remove the `React.StrictMode` then `useEffect` would be called only once/
+   *NOTE* we can't write async function as `useEffect` callback
+
+** Use Memo
+   What is memoization?
+   -- remembering some output given an input and not computing it again, used in Dynamic programming
+
+   @code javascript
+     const [input, setInput] = useState(0);
+     const [buttonValue, setButtonValue] = useState(0);
+
+     let sumValue = useMemo(() => {
+       console.log("Calculating the sum");
+       let target = parseInt(input);
+       let sum = (target) * (target + 1) / 2;
+       return sum;
+     }, [input])
+
+     function handleInputChange(e) {
+       setInput(e.target.value)
+     }
+
+     function handleButtonClick() {
+       setButtonValue(buttonValue + 1)
+     }
+
+     return <>
+       <input type="text" onChange={handleInputChange} />
+       <p>The sum is {sumValue}</p>
+       <button onClick={handleButtonClick}>Counter {buttonValue}</button>
+     </>
+   @end
+
+*** Why not use `useEffect()`
+    It introduces new state variable which causes an additional re-render
+
+** Use Callback
+   It is used memoize functions, which can help in optimizing the performance of the application, especially in cases involving child components that rely on reference equality to prevent un-necessary renders
+
+   @code javascript
+    function App() {
+      const [count, setCount] = useState(0)
+
+      // when the state change, this function gets redefined, and therefore the props passing
+      //to it also seems to change and hence the child element gets re-rendered.
+      //To prevent this unnecessary re-rendering we can use useCallback hook
+
+      const onClick = useCallback(
+        function onClick() {
+          console.log("clild is clicked")
+        }, []
+      )
+
+      return <div>
+        <Child onClick={onClick} />
+        <button onClick={() => {
+          setCount(count + 1);
+        }}>Click me {count}</button>
+      </div>
+    }
+
+    const Child = memo(function Child({ onClick }) {
+      console.log("child rendered")
+      return <div>
+        <button onClick={onClick}>Child Button clicked</button>
+      </div>
+    })
+  @end
+
+** Custom Hooks
+   Just like `useState` and `useEffect` we can write our own hooks, however it should start with *`use`*.
+   It can be used to clean up the code and most of the production level code use them.
+   It uses another hook inside the hood.
+   It is used for separation of concerns and better code management
+
+  A good examples of this can be:
+   - Data fetching hook
+   - Browser functionality related hooks - `UseOnlineStatus`, `useWindowSize`,`useMousePosition`
+   - Performance/Timer based - `useInterval`, `useDebounce`.
+
+*** Data Fetching hook
+    Can be used to encapsulate all the logic to fetch data from the backend.
+    *Could have used `SWR` library*
+
+    @code javascript
+      import axios from "axios";
+      import { useState } from "react";
+      import { useEffect } from "react";
+
+      export default function useFetchData(reloadIn) {
+        const [todos, setTodos] = useState([])
+        const [loading, setLoading] = useState(true);
+
+        // fetching the data regularly after certain time period
+        useEffect(() => {
+          const value = setInterval(() => {
+            axios.get("https://sum-server.100xdevs.com/todos").then(res => {
+              setTodos(res.data.todos);
+              setLoading(false);
+            })
+          }, reloadIn * 1000);
+
+          // we need to run it first time else we would be waiting for an extra "reloadIn" seconds
+          axios.get("https://sum-server.100xdevs.com/todos").then(res => {
+            setTodos(res.data.todos);
+            setLoading(false);
+          })
+
+          // cleaning up the old interval when new one arrives else two timer would be running together MAYHAM
+          return () => {
+            clearInterval(value);
+          }
+          // when the reloadIn variable changes it must re-run to incorporate the change in the timer
+        }, [reloadIn])
+
+        return { todos, loading };
+      }
+    @end
+
+    We only return `todos` and not `setTodos`
+
+
+** Use Ref
+** Use Reducer
+** Use Context
+** Use Layout Effect

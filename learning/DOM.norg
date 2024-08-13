@@ -1,0 +1,26 @@
+* Introduction
+  The DOM (Document Object Model) API is a programming interface for web documents. It represents the page so that programs can change the document structure, style and content. The DOM represents the document as a tree of objects; each object represents a part of the page.
+
+  Before DOM JavaScript was just the implementation of EcmaScript
+  JavaScript addes some extra functionality to the website that runs on the browser.
+
+  Some features such as `setTimeout()`, `fetch()` and other are not present in EcmaScript standards, and these are implemented by the people who wrote the browser. `Document` is one such feature of browser.
+
+  /Node.js also has such additional implementaion such as `http`, `fs`, `setTimeout` etc/
+
+  Changing the elements on the website once the website is loaded is considered making the website dynamic.
+
+* Debouncing and Throttling
+  Debouncing is not sending the request immediately to prevent throttling of backend server
+  /If the user has not typed for 100ms then send the request/
+
+** Implementing Debouncing
+   @code javascript
+    let timeout;
+    function debouncedFunciton(){
+      clearTimeout(timeout);
+      let timeout = setTimeout(function(){
+        actual_function();
+      }, 100);
+    }
+   @end

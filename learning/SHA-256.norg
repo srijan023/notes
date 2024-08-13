@@ -1,0 +1,59 @@
+* Pre-processing
+** Padding and bytes arrangement
+
+   @code c
+     #include <stdint.h>
+     #include <stdio.h>
+     #include <string.h>
+     #include <stdlib.h>
+
+     // Constants
+#define SHA256_BLOCK_SIZE 64 // 512 bits
+#define SHA256_DIGEST_SIZE 32 // 256 bits
+
+     // Function to convert a uint64_t to an array of 8 bytes
+     void uint64_to_bytes(uint64_t val, uint8_t *bytes) {
+       for (int i = 0; i < 8; i++) {
+         bytes[7 - i] = (uint8_t)(val >> (i * 8));
+       }
+     }
+
+     // Pre-process function
+     void sha256_preprocess(const uint8_t *message, size_t length, uint8_t **processed_message, size_t *processed_length) {
+       // Calculate the new length after padding
+       size_t padding_length = SHA256_BLOCK_SIZE - ((length + 9) % SHA256_BLOCK_SIZE);
+       *processed_length = length + 1 + padding_length + 8; // 1 byte for '1', padding, and 8 bytes for length
+       *processed_message = (uint8_t *)malloc(*processed_length);
+
+       // Copy the original message
+       memcpy(*processed_message, message, length);
+
+       // Append '1' bit followed by '0' bits (1 byte of '1' + 0 bits as needed)
+       (*processed_message)[length] = 0x80; // 0x80 = 10000000 in binary
+       memset(*processed_message + length + 1, 0, padding_length);
+
+       // Append the original length in bits as a 64-bit big-endian integer
+       uint64_t original_length_bits = (uint64_t)length * 8;
+       uint64_to_bytes(original_length_bits, *processed_message + *processed_length - 8);
+     }
+
+     int main() {
+       const char *message = "abc";
+       size_t length = strlen(message);
+       uint8_t *processed_message;
+       size_t processed_length;
+
+       sha256_preprocess((const uint8_t *)message, length, &processed_message, &processed_length);
+
+       // Print the processed message in hexadecimal
+       for (size_t i = 0; i < processed_length; i++) {
+         printf("%02x", processed_message[i]);
+         if ((i + 1) % 16 == 0) printf("\n");
+         else if ((i + 1) % 4 == 0) printf(" ");
+       }
+       printf("\n");
+
+       free(processed_message);
+       return 0;
+     }
+   @end

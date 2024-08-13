@@ -1,0 +1,92 @@
+@document.meta
+title: Node.js
+description:
+authors: creatio
+categories:
+created: 2024-06-19T00:34:30+0530
+updated: 2024-07-09T00:03:40+0530
+version: 1.1.1
+@end
+
+* Terminologies
+  - ECMAScript: It is a scripting langauge specification on which JavaScript is based on
+  -- It has different versions ES5/6/2015/2017
+  - JavaScript: It is a scripting language that conforms to the ECMAScript specifiction
+  -- JavaScript includes additional features that are not part of the ECMAScript specification such as Document Object Model (DOM) manipuation and setTimeout
+  -- V8: is teh compiler for JavaScript written by Google (written in C++)
+  -- SpiderMonkey: is the compiler for JavaScript written by Firefox (written in Rust + C)
+  - Node.js: some smart people took out the v8 engine, added some backend thing on top to create a new *runtime* to compete with backend languages like Java
+  -- {https://github.com/oven-sh/bun}[Bun] is similar to Node.js but written in Zig which is significantly faster than Node.js
+
+* What can we do with Node.js
+  - create CLIS (Comman Line Interface)
+  - create a video player
+  - create a game
+  - _create a /HTTP Server/_
+
+* What is a HTTP Server
+  - Hyper Text Transfer Protocol
+  - Most common way for the website's frontend to talk to its backend
+
+** Frontend
+   - Client computer
+** Backend
+   - Place where propriotory code runs
+
+** HTTP Protocol
+   In the end, its the client thowing some information at the server, server doing something with that information and responding back with the final result.
+   Think of them as functions where,
+   - Arguments are something the client sends
+   - Rather than calling a function using its name, the client uses the URL
+   - Rather than the function body, the server does something with the request
+   - Rahter than the function returning the value, the server responds with some data.
+   *They are not technically functions like on your program and they are mostly referred to as RCP (Remote Call Procedure).*
+
+*** Things the clients need to worry about
+    - We need to know the protocol (HTTP/ HTTPS)
+    - We need to know the URL or Address of the backend server (IP and the Port)
+    - Route
+    - Headers, Body and Query Params
+    - Method
+
+    /https://chat.openai.com/backend-api/conversation/
+    `^^^^     ^^^^^^^^^^       ^^^^^^^^^^^^`
+    protocol       url             route
+
+    Header - Cookie - 324sadsg324sgUdfjaerAEW
+
+    Body - What is 2 + 2 (usually in JSON)
+
+    Method - POST (GET, POST, PUT, PATCH, DELETE)
+
+    *The URL and route is interpreted to IP Address and Port using DNS server*
+
+*** Things the server needs to worry about
+    - Response body
+    - Response header
+    - Status code
+    -- 200: Everything is ok
+    -- 404: Page/ route not found
+    -- 403: Authentication error
+    -- 500: Internal server error
+
+    Response header
+
+    Response body - 2 + 2 is equal to 4
+
+    Status code - 200
+
+   There are many libraries that let you create HTTP servers, the most famous one is express
+
+* Creating our first node server
+** Things to keep in mind
+   - We can't access `req.body` directly without using `body-parser` middle ware
+   - We use `nodemon` for hot reload and activate it using `npx nodemon index.js` instead of using `node index.js`
+* Questions
+** Why do we need separate header, body and method and can't have everything inside of body
+   It generates separation of concerns
+
+** Why do we need parser for body but not for header and query string
+   Because we don't know for sure what format the body would be in, it might be in json format or in xml format or in text format
+
+

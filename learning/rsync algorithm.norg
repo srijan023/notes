@@ -1,0 +1,40 @@
+* Introduction
+  If there are two computers A and B and both of them contain similar files and we wish to sync those files between those computer, the first problem that we want to solve is finding if there is any change in the file and transfer only those transfer segements rather than the entire document
+  Steps for rsync algorithm
+  - B splits the file `Fb` into a series of non-overlapping fixed-sized block of size S bytes. The last block may be shorter than S bytes.
+  - For each block B calculates two checksums
+  -- A weak rolling 32-bit checksum and
+  -- A strong 128-bit MD4 checksum
+  - B sends these checksums to A
+  - A searches through `Fa` to find all blocks of length S bytes (at any offest, not just multiples of S) that have the same weak and strong checksum as one of the blocks of B. This can be done in a single pass very quickly using a special property of the rolling checksum
+  - A sends B a sequence of instructions for constructing a copy of `Fa` Each instructions is either a reference to a block of `Fb` or literal data. Literal data is only sent for those sections of A which did not match any of the blocks of B.
+
+* Rolling checksum
+  This is the less complex and computationally less expensive `checksum` calculation. It is the recursive approach in which the checksum for the block between `k+1` and `l+1` depends on the `checksum` from `k` to `l`
+  The checksum is defined by:
+$$
+  a(k,l) = (\sum_{i = k}^l X_i) mod M
+$$
+$$
+b(k,l) = (\sum_{i = k}^l (l - i + 1)X_i) mod M
+$$
+$$
+  s(k,l) = a(k,l) + 2^{16} b(k,l)
+$$
+
+  For simplicity and speed we use $M = 2^{16}$
+
+  The most important property of this checksum is:
+
+$$
+  a(k+1,l+1) = (a(k,l)-X_k + X_{l+1}) mod M
+$$
+
+$$
+  b(k+1,l+1) = (b(k,l) - (l -k +1)X_k + a(k + 1, l + 1)) mod M
+$$
+  _
+
+  Although simple, this was found quite sufficient for first level check for a match of two file blocks. Because of this, we can compute the more expensive checksum for only those blocks that match to confirm their match.
+
+

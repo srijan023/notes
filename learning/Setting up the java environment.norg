@@ -1,0 +1,17 @@
+@document.meta
+title: Setting up the java environment
+description:
+authors: creatio
+categories:
+created: 2024-07-03T22:01:05+0530
+updated: 2024-07-03T22:16:34+0530
+version: 1.1.1
+@end
+
+** Process of creating a Java Project
+- gradle init
+- Application
+- Language Java
+- script groovy
+- test framework JUnit Jupiter
+- APIs and behavior = no

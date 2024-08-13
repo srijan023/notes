@@ -1,0 +1,31 @@
+* Introduction
+
+  54:58 code for TODO application
+
+  State vs this method
+  Why is state important
+
+  Given a backend route, get the todo list and show them on the browser
+
+  State + Some Logic + React Magic = Dynamic Website
+
+  Rather than clearning the whole dom and then inserting all the todos based on the state, the optimized approach would be to update only the changed elements. => Very complex logic
+  This can be done by storing the previous state of DOM in a variable which is called the `Virtual DOM`
+
+  This can be done using some simpler logic, complete the code {https://gist.github.com/hkirat/ed34df967f162d152e35537cb8215144}[here]
+
+  Why do we need react or any other frontend framework
+  - for static website we don't need framework at all
+  - For dynamic website it makes easier to make DOM manipulation
+
+  React is just an easier way to write normal HTML / CSS and JS. Its new syntax but under the hood it gets converted to HTML/CSS/JS
+  React code -------- npm run build ------> HTML/CSS/Js
+
+** Why react why learn new syntax
+   Dom manipulation is harder in conventional way
+   JQuery came to picture to make it easier but its still tough
+   Therefore React/Vue and other framework came into picture
+   Traditinal way not only difficult to write, it is a nightmare to scale
+
+
+

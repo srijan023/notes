@@ -1,0 +1,190 @@
+** What is state management
+   - A cleaner way to store the state of your app.
+   - Until now the cleanest way to do that was context api.
+   - But there are better solutions that get rid of the problem that context api has (unnecessary re-renders)
+
+* Recoil
+  A state management library for React. The other popular one are:
+  1. Zustand
+  2. Redux
+
+  - It has concept of an `atom` to store the state
+  - An atom can be defined outside of a component and teleported to the component that requires it.
+
+** Things to learn about recoil
+*** `RecoilRoot`
+   @code javascript
+      <RecoilRoot>
+        <Count />
+      </RecoilRoot>
+   @end
+
+*** `atom`
+   @code javascript
+     import { atom } from "recoil";
+
+     // defining an atom
+     export const countAtom = atom({
+       // uniquely identify this atom
+       key: "countAtom",
+       // default value
+       default: 0
+     })
+   @end
+
+*** `useRecoilState`
+   @code javascript
+      const [count, setCount] = useRecoilState(countAtom);
+   @end
+
+*** `useRecoilValue`
+   @code javascript
+      const count = useRecoilValue(countAtom);
+   @end
+
+*** `useSetRecoilState`
+   @code javascript
+      const setCount = useSetRecoilState(countAtom);
+   @end
+
+*** `selector`
+    A selector represents a piece of `derived state`. For normal `useState` to create a derived state we use `useMemo`. For recoil we have `selector`.
+    This means that if the original state is not changed, the derived state is also not changed and therefore the component using it would not rerender.
+
+    The difference between using `selector` and `useMemo` is that it is outside of local component which makes it eaiser for teleportation. Therefore if an independent component depends on the `evenSelector` described below we can use it with no problem, but if it were `useMemo` we would have to write it again.
+
+    @code javascript
+      // derived state using selector
+      export const evenSelector = selector({
+        key: "evenSelector",
+        get: (props) => {
+          // this depends on countAtom
+          const count = props.get(countAtom);
+          return count % 2;
+        }
+      })
+    @end
+
+*** Asynchronous Data queries
+    In case of real appication, data come from the backend server. What do we do when we want to set the default value of an atom, the value of an axios result.
+    First why would we want to do so rather than keeping an axios method inside an `useEffect` hook and then intialize the state.
+    -- this is done the prevent the initial flash which would be seen during time time between the mounting of the component and the axios being called
+    -- also it makes the code more robust.
+
+    It can be done using Asynchronous data queries which uses selector. The default value of any atom can't be a value from a function until the function used is a `selector`. Therefore it would be something like this:
+    @code javascript
+      export const notifications = atom({
+        key: "notifications",
+        // we will add all our notifications here
+        // we wish to keep default value the data fetched from axios
+        // selectors can be used to incorporate async data into the recoil
+        default: selector({
+          key: "notifications/default",
+          get: async (props) => {
+            const res = await axios.get("http://localhost:4000/notifications");
+            return res.data;
+          },
+        }),
+      });
+    @end
+
+** Advanced Recoil concepts
+*** `atomFamily`
+    Problem statement:
+    - create a component that takes a todo id as input, and renders the TODO
+    -- we can't use `useState`
+    -- TODOs can be hardcoded
+
+    - Each component needs to create it own atom based on the `id` which contains the todo
+    - If the `id` is the same, it has to be the same atom.
+    - This problem is solved by `atomfamily`
+
+    _Component logic_
+    @code javascript
+      function App() {
+        return <RecoilRoot>
+          <Todo id={1} />
+          <Todo id={2} />
+        </RecoilRoot>
+      }
+
+      function Todo({ id }) {
+        // new atom created based on the id
+        // this returns an atom which as an id == id
+        const todo = useRecoilValue(todoAtomFamily(id));
+        return (
+          <>
+            {todo.title}
+            {todo.description}
+            <br />
+          </>
+        )
+      }
+    @end
+
+    _Atom logic_
+    @code javascript
+      // this creates a new atom based on the id provided to it
+      // atomFamily returns a function that returns an atom to you
+      // so todoAtomFamily is storing a function
+      export const todoAtomFamily = atomFamily({
+        key: "todoAtomFamily",
+        // give me the id I will store the todo with that id
+        default: (id) => {
+          return TODOS.find((x) => x.id === id);
+        },
+      });
+    @end
+
+*** `selectorFamily`
+    Since we could use `selector` for `async` fetch, we can similarly use `selectorFamily` to make an async `atomFamily`
+    @code javascript
+      export const todosAtomFamily = atomFamily({
+        key: "todosAtomFamily",
+        default: selectorFamily({
+          key: "todoSelectorFamily",
+          get:
+            (id) =>
+            async ({ get }) => {
+              const res = await axios.get(`http://localhost:4000/todos/${id}`);
+              return res.data.todo;
+            },
+        }),
+      });
+    @end
+
+    /Getting data from the backend takes time and during this time we can't load the component such as the todo component written above as no data is available.
+    For this we need to put a loader for that time period. This problem is solved by `useRecoilStateLoadable` and `useRecoilValueLoadable`/
+
+*** `useRecoilValueLoadable`
+*** `useRecoilStateLoadable`
+
+    @code javascript
+      function Todo({ id }) {
+        const [todo, setTodo] = useRecoilStateLoadable(todosAtomFamily(id));
+        if (todo.state === "loading") {
+          return <div>loading</div>
+        }
+
+        if (todo.state == "hasError") {
+          return <h1 style={{ color: "red" }}>Error while fetching data from backend</h1>
+        }
+
+        // we also have todo.state=="hasValue" but we don't need that coz we have already checked all other cases above
+
+        return (
+          <>
+            {todo.contents.title}
+            {todo.contents.description}
+            <br />
+          </>
+        )
+      }
+    @end
+
+
+** Should we get rid of useState overall then?
+   If we just want to use a state only inside a single component or only the child uses it then `useState` is just fine
+   Recoil is good for global states
+
+

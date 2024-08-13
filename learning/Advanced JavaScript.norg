@@ -1,0 +1,21 @@
+@document.meta
+title: Advanced JavaScript
+description:
+authors: creatio
+categories:
+created: 2024-06-16T17:11:38+0530
+updated: 2024-06-16T21:53:13+0530
+version: 1.1.1
+@end
+
+* How can we write our own async function
+  - wrapping around another async function
+  @code JavaScript
+  myOwnSetTimeOut(fn, duration){
+    setTimeout(fn, duration);
+  }
+  @end
+
+  -
+
+

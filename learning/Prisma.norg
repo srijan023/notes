@@ -1,0 +1,150 @@
+@document.meta
+title: Prisma
+description:
+authors: creatio
+categories:
+created: 2024-08-11T22:49:02+0530
+updated: 2024-08-11T22:49:02+0530
+version: 1.1.1
+@end
+
+* Introduction
+  ORM stands for Object-Relational Mapping, a programming technique used in software development to convert data between incompatible type systems in object-oriented programming languages. This technique creates a "virtual object database" that can be used from within the programming language.
+  ORMs are used to abstract the complexities of the underlying database into simpler, more easily managed objects within the code
+
+  /ORMs let you easily interact with your database without worrying too much about the underlying syntax (like SQL or Mongoose)/
+
+* Why ORMs
+  - Simpler syntax
+    @code javascript
+    const query = "SELECT * FROM users where email = $1"
+    const result = await client.query(query, ["srijangyawali01@gmail.com"])
+    @end
+
+    /Using ORM/
+    @code javascript
+    User.find({
+      "srijangyawali01@gmail.com"
+    })
+    @end
+
+  - Abstraction that lets you flip the database you are using. Unified API irrespective of the DB
+    Since all the application logic remains the same we would only change the connection to the DB section where we mention the actual database we would like to connect to.
+
+  - Type safety/ Auto completion
+    If we are writing our program in typescript, the query part of the program would have the type `any`
+    @code typescript
+    const result: any = await client.query(query, ['srijangyawali01@gmail.com'])
+    @end
+
+    If we use `ORM`
+    @code typescript
+    const user = UserDb.find({email: "srijangyawali01@gmail.com"})
+    @end
+    Here user would have a type /watch in the actual code/
+
+  - Migrations
+    In case of the simple `Postgres` app, it's very hard to keep track of all hte commands that were ran that led to the current schema of the table
+    Suppose we first created a `Users` table and then added `Todos` table and later on changed the `Users` table to add `phoneNumber` of the user.
+    How would we remember all the commands that led to the *creation of that schema*
+    ORM (or more specifically Prisma) maintains all this for you by creating a separate migration file that store all those information.
+
+  /Migrations are the files that stores all the commands that are related to create the current schema, which can be useful if we wish to change the database as it would automatically create the same schema on that new database (schema meaning tables)/
+
+* What is Prisma
+  It is a next generation Node.js and Typescript ORM, which unlocks a new leve of developer experience when working with databases thanks to its intuitive /data model/, /automated migrations/, /type-safety/ and /auto-completion/
+
+  - Data model
+    In a single file, define your schema. What it looks like, what tables you have, what field each table has, how are rows related to each other.
+
+* Installing Prisma
+** initilizing the Node.js project
+   @code bash
+   npm init -y
+   @end
+
+** Adding dependencies
+   @code bash
+   npm install prisma typescript ts-node @types/node --save-dev
+   @end
+
+** Initialize typescript
+   @code bash
+   npx tsc --init
+   # make sure you have tsc installed globally
+   # Change rootDir to src
+   # Change outDir to dist
+   @end
+
+** Initialize a fresh prisma project
+   @code bash
+   npx prisma init
+   @end
+
+** Choosing the database
+   Inside the `.env` file write down the connection string of the database you would wish to connect to
+
+** Creating the schema of the model
+   Inside the `schema.prisma` file define your schema
+   @code prisma
+     model User {
+       id Int @id @default(autoincrement())
+       // id INTEGER SERIAL PRIMARY KEY
+       email String @unique
+       firstName String
+       lastName String?
+       // optional lastName
+       password String
+     }
+
+     model Todo{
+       id Int @id @default(autoincrement())
+       title String
+       done Boolean @default(false)
+       description String
+     }
+   @end
+
+** Generating the migration
+   @code bash
+   npx prisma migrate dev --name addUserAndTodo
+   @end
+
+   /If drift detected then it means that you have something already on the database, you delete the database and start from scratch/
+   /Other options for neon database are aiven or elephant db or supabase/
+
+* Creating a Prisma Client
+  We create a `prisma.schema` file where we define all our database schema.
+  Now we use the prisma syntax to communicate with our database.
+
+  @code typescript
+  User.find({"srijangyawali101@gmail.com"})
+  @end
+
+  `index.ts` would import User from prisma and prisma needs to create a `JavaScript` class `User` which would allow us to use all those methods. This is called creating a client.
+
+  So steps are:
+  1. Create a schema
+  2. Migrate the schema
+  3. Auto create a client which creates class for those tables to be used
+  4. Use those classes to communicate with the database in the TypeScript file.
+
+  Client represents all the commands that convert
+  @code typescript
+  User.create({email: "srijangyawali101@gmail.com"})
+  @end
+
+  To
+
+  @code sql
+  INSERT INTO users VALUES ...
+  @end
+
+  To generate these clients we need to run the command
+  @code bash
+  npx prisma generate
+  @end
+
+* Questions
+** What happens when the insertion fails (due to duplicate username, id) and we have id autoincrement
+   Then the id would increase even though it failed so if the 45 id insertion failed the next successful insertion would be 46

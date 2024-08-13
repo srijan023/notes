@@ -1,0 +1,85 @@
+@document.meta
+title: E-commerce
+description:
+authors: creatio
+categories:
+created: 2024-06-11T00:09:49+0530
+updated: 2024-06-11T00:53:43+0530
+version: 1.1.1
+@end
+
+* Chapter 2
+** Elements of business model
+   - value proposition (what value can you provide)
+   - revenue model (how are you going to earn)
+   - market opportunity
+   - competitive advantage
+   - marketing strategy
+   - organizational development (production, packaging, packing, shipping, customer support and finance)
+   - management team
+
+** Types of revenue model
+   - sales model
+   - advertising model
+   - subscription model
+   - transaction fee model
+   - affiliate model
+
+** B2C Business Model
+   - E-trailer
+   - Content Provider (Blogs, Musics, images, videos or clips)
+   - Portals (News)
+   - Community Provider
+   - Transaction broker
+   - Service provider (Event planner, holiday planner)
+
+** B2B Business model
+   - Network marketplace
+   -- E-distribution (Amazon buisness)
+   -- E-procurement (Ariba Network)
+   -- Industry consortium (Covisint)
+   -- Exchange market (CME Group)
+   - Private Industrial network (Walmart Retail link)
+
+* Electronic Data Interchange (EDI)
+  - Advantages
+  -- Automated
+  -- standardized
+  -- quicker
+  -- accurate
+  -- cost saving
+  - elements of EDI for e-commerce
+  -- purchase order
+  -- invoice (seller to buyer for payment)
+  -- shipping request
+  -- acknowledgement
+
+** Layers of EDI
+   - Application layer
+   - Standard layer (ANSI X12 for purchase order, EDIFACT INVOIC)
+   - Transport layer
+   - Physical layer
+
+* Terminologies
+** E-commerce and Industry value chain
+   - Meaning: An industry value chain is a series of steps that an industry goes through to produce a product or service. It includes everything from the initial stages of sourcing raw materials to the final delivery of the finished product to consumers.
+   - Example: In the automotive industry, the value chain includes raw material suppliers (like steel producers), parts manufacturers (making engines, tires, etc.), automobile manufacturers (assembling the cars), distributors (shipping the cars to dealerships), and dealerships (selling cars to consumers).
+   - relation:
+   -- manufacturers can reduce cost (industry consortium)
+   -- distributors (warehose and inventory management)
+   -- customers (good options and more detail)
+
+** Firm value chain
+   - Meaning: A firm value chain represents the full range of activities that a specific company performs to create a product or service. These activities are designed to add value at each step, from initial production to final delivery to the customer.
+
+   - Example: Consider a coffee company like Starbucks. Their firm value chain includes:
+     - Procuring high-quality coffee beans.
+     - Roasting the beans to perfection.
+     - Distributing roasted coffee to their stores.
+     - Marketing their brand to attract customers.
+     - Selling the final coffee product to customers in their stores.
+
+** Firm value web
+   - Meaning: Firm value webs, also known as value networks, are more complex and interconnected than a simple value chain. They involve multiple interconnected value chains where companies collaborate and share resources, information, and capabilities to create value. This network approach recognizes the interdependencies among various firms in producing and delivering products and services.
+   - Example: Apple Inc. operates within a firm value web. It collaborates with various suppliers for components (like screens from Samsung, processors from Intel), manufacturers (like Foxconn for assembly), software developers (for apps and services), logistics providers (for shipping products), and retail partners (like Best Buy and carriers like Verizon). All these partners work together to bring Apple products to market.
+

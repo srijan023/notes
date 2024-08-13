@@ -1,0 +1,17 @@
+@document.meta
+title: software_engineering
+description: 
+authors: creatio
+categories: [
+  academics,
+  csit,
+]
+created: 2024-05-28T16:11:36+0530
+updated: 2024-05-28T23:44:35+0530
+version: 1.1.1
+@end
+
+* Software Engineering
+  {:software_testing:}
+
+

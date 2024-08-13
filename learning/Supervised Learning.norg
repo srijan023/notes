@@ -1,0 +1,12 @@
+@document.meta
+title: Supervised Learning
+description:
+authors: creatio
+categories:
+created: 2024-08-02T13:08:21+0530
+updated: 2024-08-02T13:08:21+0530
+version: 1.1.1
+@end
+
+* Topics
+  {:Linear Regression:}

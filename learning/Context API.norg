@@ -1,0 +1,64 @@
+{https://react.dev/learn/passing-data-deeply-with-context}[Resource to learn context-api in detail]
+
+- This is the way to /teleport/ state to the component
+- particularly useful for distant children
+
+- If you use the context api, you're pushing your state management outside the core react component,
+  what this means is, it is mildly good for state management
+
+- *Context API is not for optimization it is just to make code look better*
+
+** Steps
+   - first create a context on context.jsx
+
+   @code javascript
+      import { createContext } from "react";
+
+      export const CountContext = createContext({count, setCount});
+   @end
+
+   -  wrap anyone that wants to use the teleported value inside a provider
+   - get it on the compontnet using the hook
+
+@code javascript
+  function App() {
+    const [count, setCount] = useState(0);
+    return <div>
+      <CountContext.Provider value={count}>
+        <Count setCount={setCount} />
+      </CountContext.Provider>
+    </div>
+  }
+
+  function Count({ setCount }) {
+
+    return <>
+      <CountRenderer />
+      <Button setCount={setCount} />
+    </>
+  }
+
+  function CountRenderer() {
+    const count = useContext(CountContext)
+    return <h1>{count}</h1>
+  }
+
+  function Button({ setCount }) {
+    // getting here using useContext hook
+    const count = useContext(CountContext)
+    return <div>
+      <button onClick={() => {
+        setCount(count + 1)
+      }}>Increase</button>
+      <button onClick={() => {
+        setCount(count - 1)
+      }}>Decrease</button>
+    </div>
+  }
+@end
+
+   - we can also pass `{count, setCount}` as the value for `contextProvider`
+
+** What is the problem with context-api
+   Here, though we don't pass the value through the Count component, it rerenders when the count variable changes. This confirms that it is just a prettier format for prop drilling
+   Therefore, we use the state management tool such as the redux or recoil to make the rendering more performant

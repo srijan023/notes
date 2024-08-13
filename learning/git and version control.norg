@@ -1,0 +1,423 @@
+@document.meta
+title: git and version control
+description:
+authors: creatio
+categories:
+created: 2024-08-10T13:15:18+0530
+updated: 2024-08-10T13:15:18+0530
+version: 1.1.1
+@end
+
+* Introduction
+  Throughout the process of software development we might want to go to the previous version of the project in case we face any problem or want to check out the past architecture or methods. In such case we would want some version control method. `Git` is one such version control method.
+  Version control system means that it tracks files for changes.
+  It creates a checkpoint which can be revisited.
+  It also helps in collaborative working.
+
+  Difference between git and github is git is a software and github is a service provider.
+
+* Terminologies
+** Repo
+   Repo or repository is a folder that contains all the information about a software or a system under development
+
+* Tracking a folder
+   Working directory (created using `git init`) -----> [git add] -----> Creates a staging area -----> [git commit] -------> Repo -----> [git push] -------> github
+
+** Status
+   If we want to know about the current status of our repo we use the `git status` command
+
+** Initializing git
+   @code bash
+   git init
+   @end
+   It is run one time in a project.
+   It creates a `.git` folder to keep history of all the files and folders.
+
+*** .git Folder
+    We don't change the content of this folder
+
+** Add
+   The workflow for any project and working with git is:
+   Write code ---> Add code ---> Commit code
+
+   When we create a working directory in git with `git init` we then write few files within that directory.
+   By default git would not be tracking those newly created files and therefore we need to tell git to add those files to its tracking list.
+   For that purpose we use the `git add` command
+
+   @code bash
+   git add filename.extension secondfileName.extension foldername
+   @end
+
+   or simply
+   @code bash
+   git add .
+   @end
+   To add every single untracked file to the tracking area.
+
+   It takes the files to the staging area. Only the files in the staging area would be commited when we run the `git commit` command
+
+** Commit
+   Creating a checkpoint
+
+   It needs a message. If we don't provide the message it would open `n**o` by default which would give an option to add the message on the top. The name of the file is `COMMIT_EDITMSG` which is located inside `.git` file
+
+   @code bash
+   git commit -m "The message along with the commit"
+   @end
+
+*** Atomic Commits
+    Keep commits centric to one feature, one component or one fix of but. (Focus on one thing)
+    The message is supposed to be in present imperative (order) form meaning we don't say 'File transfer done' rather we say 'do file transfer'
+
+** Log
+   When we run the `git log` command we get something like this
+   @code bash
+   commit 54c2af087f07675bd6b5312df226186e530c1f8f (HEAD -> master)
+   Author: srijan023 <gyawalisrijan01@gmail.com>
+   Date:   Sat Aug 10 14:02:00 2024 +0545
+
+   add second file to code base
+
+   commit 1442c1ba280ab645084a2b2b9c5fdbee113a25c2
+   Author: srijan023 <gyawalisrijan01@gmail.com>
+   Date:   Sat Aug 10 14:01:45 2024 +0545
+
+   First adding the testone file
+   @end
+
+   What we see is:
+   @code bash
+   commit <Commit ID>
+   Author: <author id> <author email>
+   Date: <date of the commit in timestamp>
+
+   <commit message>
+   @end
+
+   However if we do `git log --oneline` we get the shorter version of this
+
+
+* Git config file
+** Setting up username and email
+   @code bash
+   git config --global user.name "Mona Lisa"
+   git config --global user.email "monaLisa@artnation.com"
+   @end
+
+** Changing the code editor
+   @code bash
+   git config --global core.editor "nvim"
+   @end
+
+   However if you are trying to use `v***de` as your default text editor you can change it to `"c**e --wait`
+   `--wait` is required because it has to wait until we do our stuff and we manually close it.
+
+** file to store git config
+   In home directory there is `~/.gitconfig` which stores all the information
+
+* Git Ignore
+  has to be manually created (most of the time) and is named as `.gitignore`
+  There are `.gitignore` generators which can help you write contents
+
+  We specify the files or folders which we don't want to track on this file
+  @code .gitignore
+  .env
+  node_modules/
+  @end
+
+* Git behind the scene
+** Commit BTS
+   Each commit is dependent on the previous commit except the first commit, think of it as a linked list
+
+   @code text
+   Hash                       Hash                    Hash
+   null <- Parent <---------- parent <-------------- parnet
+   info                       info                    info
+   @end
+
+* Branches
+
+  Like an alternate timeline (not from Dr. Strange)
+  you are always on some branch.
+
+  If we go to the `.git` folder and check the `HEAD` file it points to the current branch you are working on.
+** Creating new branch
+   @code bash
+   git branch <branch-name>
+   @end
+
+   When the new branch is created inside the `.git` file and `refs/heads` folder we get a new file with that branch name
+
+** Deleting the branch
+   @code bash
+   git branch -d <branch-name>
+   @end
+
+** List all branches
+   @code bash
+   git branch
+   #or
+   git branch -a
+   @end
+
+** Changing the active branch
+   @code bash
+   git checkout <branch-name>
+   @end
+
+   If we change the active branch, now the `HEAD` file `ref` inside the `.git` folder points to the different branch name
+
+   If we remember the `git log` command and its output, (onliner shown below)
+   @code bash
+   c35008c (HEAD -> nav-bar) add navbar to codebase
+   47cdfc8 update code for index file
+   eade564 add index file
+   @end
+
+   Here we can see that `HEAD` points to the latest commit of any branch (by default)
+   We can change the head to previous commits.
+
+   /Commit before checking out to another branch/
+
+** Creating and changing branch
+   @code bash
+   git checkout -b <branch-name>
+   # or
+   git switch -c <branch-name>
+   @end
+
+** Branch `master`
+   The main and master branch are the same, they denote the current active and most updated or stable version of the system.
+   In every deops software there is a trend of calling on the `master` series and other the `slave` however few people found it offensive and now a days we call the master branch the main branch.
+   Git being an older system still uses the word `master` while github uses the word `main` for this.
+
+   to change the name master to main we can use:
+   @code bash
+   git branch -M main
+   @end
+
+** Merging the branches
+
+   @code bash
+   git merge branch-name
+   # most of the cases we would like to delete the alternate branch after it has been merged
+   git branch -d branch-name
+   @end
+
+*** Fast forward merge
+    Here the main branch is not doing anything, what ever we do is on the separate branch and at the end we merge the separate branch to the main branch.
+
+*** Not fast forward merge
+    Here the main branch is progressing along with the alternate branch.
+
+*** Resolving coflicts
+    Git tries to resolve conflicts as far as possible
+    When the same file is changed in two different brances and then we proceed to merge those two branches then the conflicts arise and we are provided with an message stating we can only commit the merged state after we resolve the conflit and merge it manually. This can be done by going through the code base manually and making changes to the code base.
+    The structure for the merge conflict inside the codebase looks like this:
+
+    @code html
+    <<<<<<< HEAD
+    <h1>New Footer for the program</h1>
+    =======
+    <p>This is a footer</p>
+    >>>>>>> nav-bar
+    @end
+
+    Here the code below the `<<< HEAD` and above the `====` is the code from the current branch.
+    And the other part of the code is the code from the branch we were trying to merge to our current branch.
+
+    To resolve the conflicts we need to remove all those fancy texts that was provided by git and also choose which part of the code we want to keep, the current branch, the imported branch or both.
+    After the conflict is setteled we need to commit the branch one more time.
+
+* Git diffs
+  Shows you the differences between the same file on two different time
+  If we consider two different time state of the same file as `a` and `b` then
+  a is represented by `---`
+  b is represented by `+++`
+
+  @code bash
+  git diff --staged
+  @end
+  this will show the differences between the staged files and the files before they were staged meaning the previous commit
+
+  @code bash
+  git diff g24sdf2 e323dsf
+  @end
+  this will show the differences between the commit state of g24sdf2 and e323dsf
+
+  /Sometimes the space between the two conditions might not work in such cases use `..` as `git diff g24sdf2..e323dsf`/
+
+  We can also see the differences between two branches as
+
+  @code bash
+  git diff branch1..branch2
+  @end
+
+* Stashing
+  if we have conflicting changes then we are not allowed to switch to another branch until we commit.
+  stash is the workaround for this.
+
+  Think of stash as a shelf where we keep our code, move around the other branch, perform other task and come back to it later.
+  This allows us to work ourself around the part of comitting everytime we wish to work around the other branches.
+
+** Using stash
+  To stash our code we use
+  @code bash
+  git stash
+  @end
+
+  To get our code back when we return from another branch we do
+  @code bash
+  git stash pop
+  @end
+
+  /If we don't pop the stash, none of our changes after the last commit would be shown/
+
+  *Stash is not limited to the branch, we can stash in one branch and get that onto another branch*
+
+** Listing and choosing stashes
+  We can get all the stash using the command
+  @code bash
+  git stash list
+  @end
+
+  And choose from which stash to apply by:
+  @code bash
+  git stash apply stash@{0}
+  @end
+
+* Moving around the timeline
+  We can go to any previous commits using
+
+  @code bash
+  git checkout <Hash>
+  @end
+
+  or if we want to go `n` commits back we can do
+
+  @code bash
+  git checkout HEAD~n
+  @end
+
+  `n` being the number of commits we wish to go back
+
+  If we want to get to the latest commit of any branch we checkout using the branch name
+  @code bash
+  git checkout master
+  @end
+
+  We can use `reflog` to go to previous commit where we came from
+  @code bash
+  git reflog
+  @end
+
+* Restoring any file
+  We can restore any file to the previous commit using the command
+  @code bash
+  git restore filename
+  @end
+
+  /We can only go back to previous commit not any further/
+
+* Git rebase (Not important)
+  (Learn it more not so necessary just cleaning)
+  It can be used as an alternate to merging
+  It takes all the branches and make it a linear timeline
+
+  /*Never run on master or main branch*/
+
+** Why use rebase
+   Suppose I am working on a bugfix branch of the project and I want all the changes from the master branch to appear on my current branch. I can do merging of the master branch to my current bugfix branch as
+   @code bash
+   git merge master
+   @end
+
+   However this would lead us with some unnecessary commits on the timeline which are just merging of the branch.
+   Rather than doing this what we can do is we can rebase the branch to master branch.
+
+   @code bash
+   git rebase master
+   @end
+
+   Learn more about how it changes the base of the branch and overlaps it with the master branch.
+
+** Resolving the conflicts
+   The conflicts are same as in merging
+   When we are done with manually solving all the conflicts, we `add` those files and then run the command
+
+   @code bash
+   git rebase --continue
+   @end
+
+* Github
+** Remote
+   Local repository on the system and remote repository is on cloud
+
+*** adding remote repository
+   we can add remote repository path
+   @code bash
+   git remote add origin remote-repository-name
+   @end
+
+*** list remote repository
+   After we have added the remote repository we can check our remote repository using
+   @code bash
+   git remote -v
+   @end
+
+   which provide us with repository to fetch and push our local repository
+
+** push
+   Pushing is uploading our code from local repository to the remote repository
+   Now we push on this remote repository from our local repository
+
+   @code bash
+   git push -u origin main
+   @end
+
+*** `-u` but why
+   It sets up an upstream meaning that from now on we don't need to specify `origin` and `main`
+   It links with the remote repository and automatically does that for us and we can do `git push`
+
+** cloning the remote repository
+   Getting the remote repository locally
+
+   @code bash
+   git clone https://github.com/username/reponame
+   @end
+
+** pull
+   It takes in the latest commit from the remote repository and inserts in to your local repository.
+   Therefore this can be considered to be the combination of `git fetch` and `git merge`
+
+   There is however a problem with `git pull`
+   here, we need to specify the merging strategy. The possible options are
+   1. fast-forward only (--ff-only)
+      If there is no changes on the local repository only then it is possible
+
+   2. optional fast-forward (-ff)
+      This is the standard method in which the git allows you to solve the conflicts and then merge it.
+
+   3. rebase (-rebase)
+      This makes it appear that any local changes happened after the git pull of the remote branch.
+
+** fetch
+   What if we only want to view the changes on the remote repository rather than using it on our local repository.
+   Also fetch allows us to verify the changes before getting it on our local repository.
+   Therefore people usually prefer `git fetch` followed by `git merge`
+
+** fork
+   getting the entire code in you account.
+
+   Fork the open source project, clone it and do your work
+   Don't write you code on the main branch, create a new branch for the feature you are working on.
+
+** sending the pull request
+   once we are done with the feature you are working on and pushed to the github account, if you visit your account now you will see an option stating
+   *`Comare and subimt a pull request`*
+   If we do that we will be prompted with two input boxes,
+   /remember that this pull request is sent to the actual owner of the repository and is merged with the main branch therefore this is really sensitve and most not be done randomly/
+   On those input boxes provide as much infomration as you can about your work on that issue.
+
+   *It supports Markdown*
+

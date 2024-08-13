@@ -1,0 +1,118 @@
+* Introduction
+  write some frontend code that takes the data from some API
+
+  @code javascript
+    function getAnimalData() {
+      // by default its a get request
+      fetch("https://fakerapi.it/api/v1/persons").then(function (res) {
+        res.json().then(function (response) {
+          console.log(response);
+        });
+      });
+    }
+
+    async function getAnimalData() {
+      const res = await fetch("https://fakerapi.it/api/v1/persons");
+      const json = await res.json();
+      console.log(json);
+    }
+  @end
+
+  Fetch api returns a promise as its an async function.
+  By default the fetch api does an `GET` HTTP call.
+
+  There is also a better approach to do using axios which directly coverts the result into json
+  @code javascript
+    const res = axios.get("https://fakerapi.it/api/v1/persons");
+  @end
+
+* Difference between `axios` and `fetch`
+  `axios` is an external library that provide some additional features and cleaner syntax over `fetch`
+
+  1. first you don't need to convert the body to the `json` format
+
+  @code javascript
+    // in fetch
+    async function main() {
+      const res = await fetch("https://sum-server.100xdevs.com/todos");
+      const json = await res.json();
+      console.log(json.todos.length);
+    }
+
+    // in axios
+
+    async function main() {
+      const res = await axios.get("https://sum-server.100xdevs.com/todos");
+      console.log(res.data.todos.length);
+    }
+  @end
+
+  2. This is particularly useful when we are unsure about the type of data the request is going to return.
+  @code javascript
+    const data = await res.text();
+    // or
+    const data = await res.json();
+  console.log(data);
+  @end
+
+  3. Post requests are particularly easy to implment in axios
+  @code javascript
+     async function fetch_post() {
+      const res = await fetch("http://localhost:3000/", {
+        method: "POST",
+        body: JSON.stringify({
+          username: "Srijan",
+          password: "12345",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer 123",
+        },
+      });
+      const jsondata = await res.text();
+      console.log(jsondata);
+    }
+
+
+     async function axios_post() {
+      const res = await axios.post(
+        "http://localhost:3000",
+        {
+          // second argument
+          // this is the body
+          username: "Srijan",
+          password: "12345",
+        },
+        {
+          // third argument
+          headers: {
+            Authorization: "Bearer 123",
+          },
+        },
+      );
+      console.log(res.data);
+    }
+  @end
+
+  *NOTE*: /In the post request we can send body therefore the second argument is the body, but in get method we can't send the body and therefore the second argument is the header. PUT, PATCH, DELETE also support body/
+
+
+  4. `axios` has some awesome syntax which does not require us to remember any order
+  @code javascript
+     async function clean_axios_post() {
+      const res = await axios({
+        url: "http://localhost:3000/",
+        method: "POST",
+        headers: {
+          Authorization: "Bearer 123",
+        },
+        data: {
+          username: "Srijan",
+          password: "123",
+        },
+      });
+     }
+  @end
+
+
+

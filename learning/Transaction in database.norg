@@ -1,0 +1,28 @@
+* Transaction in Database
+  You want multiple database transaction to be /atomic/
+  Meaning either the transaction happens or it does not
+
+  A very basic implmentation of banking transaction would be something like this:
+  @code javascript
+    const mongoose = require("mongoose");
+    const Account = require("./path-to-your-account-model");
+
+    const transferFund = async(fromAccountId, toAccountId, amount)=>{
+      // decrease the amount from the source account
+      await Account.findByIdAndUpdate(fromAccountId, {$inc: {balance: -amount}});
+
+      // increase the amount to the destination account
+      await Account.findByIdAndUpdate(toAccountId, {$inc: {balance: amount}});
+    }
+  @end
+  /What if the account gets decreased from `fromAccountId` but does not increase on `toAccountId` which has several cases to happen:/
+  - if `toAccountId` is not a valid user id
+  - node server crashes between the transaction
+  - databases went does in between
+
+  Which result to database having `unstable` state
+
+*** if we simply put the if statement to check the balance above the transaction
+    One possible problem is since the actual transaction is asynchronous it takes time. If two requests come at the same time then, it may go through the if statement check which would again lead the database to have `instable` form.
+
+

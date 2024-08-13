@@ -1,0 +1,130 @@
+@document.meta
+title: Learning_neorg
+description: 
+authors: creatio
+categories: [
+  niche,
+  neovim
+]
+created: 2024-05-27T13:31:54+0530
+updated: 2024-05-27T14:24:35+0530
+version: 1.1.1
+@end
+
+.toc My custom title
+
+
+Index.neorg is for the table of content which we wish to view later
+
+* This is the first level heading
+** This is the second heading
+*** This is the third level heading
+**** This is fourth level heading
+     Some text
+     Some other text
+
+
+* Some markdown
+  *bold* is surrounded by *
+  /italics/ are surrounded by /
+  _underlines_ are done by _ 
+  and finally -strikethrough- is done by -
+  we can also merge this *-strikethrough and bold-*
+
+* Create new note
+  To create a new note we can do /<LocalLeader>/ nn
+  We can go to the index page using `:Neorg index` command
+
+* Creating a list item
+  - ( ) This is a todo item
+        <C-Space> will toggle between undone done and pending
+        We can view the help for other options such as urgent pending recurring and more
+        /Might have to disable concealer using `:Neorg toggle-concealer` command/
+        We can also toggle through different option using <LocalLeader> g and 
+  - d for done
+  - u for todo
+  - p for pending and so on
+  - ( ) This is a nested todo item
+        Nesting of todo item can be done using -- instead of - for list 
+  -- (=) First
+  -- ( ) Second
+  -- (x) Third
+  -- (-) Fourth
+
+* Links in neorg
+** Folders inside of workspace
+   We can also create advacned folder structure inside of a sigle workspace
+   Suppose I have notes as a workspace and inside notes I want to create two different folder sturcture one is *niche* and another is *academics* to do so inside of index. We can create two folders /niche/ and /academics/ using netrw or any other plugin you want and then link to those notes inside those folders using {:niche/Learning_norg:}
+
+** Linking to elements inside the file
+   To create a link to a heading in neorg we can use * instead of : /which is not closed at the end by another */ Another way is to use # instead of * for any level of heading as * is only for first and for second level heading we use ** 
+   This is a link to a heading of this file {* Some markdown}
+
+   Links to the headings need to be same as the heading name and therefore some error might take place we can solve those using the fix command 
+   {* some markedown}
+   - ( ) Write down the keymap for the fix command
+
+** Giving custom name to the link
+   {* some markdown}[this is a link]
+   this can be done by `{:link:}[description]`
+
+** Anchor
+   Achor and links are pritty much the same the only difference is that in anchor the description comes earlier than the link itself and then provide us with an interface that whenever we wish to link to that place we can now use he description without the actual link
+   [anchor to heading]{* some markdown}
+
+   This is also a [anchor to heading]
+
+** Creating a link to a heading in another file
+   We can do so using the combination of file linking and heading linking
+   `{:folderName/filename:* first level heading}[description]`
+
+** Creating a link to the url
+   This is a link to my github profile
+   {https://github.com/srijan023}[Github]
+
+* Workflow imporvement
+** core.pivot module
+   We can change the list type using this module and `<Space>`lt which toggles between ordered and unordered list
+   ~ List item 1
+   ~ List item 2
+   ~ List item 3
+   ~ List item 4
+
+** core.itero module
+   This module allows us to continue whatever we were doing on to the next line meaning if we were making a list item we can press <M-Enter> to continute adding to the list item
+   - first
+   - second
+
+** core.promo module
+   We can use `>>` and `<<` to promote or demote the heading or list level
+   For insert mode command we can use `C-t` and `C-d`
+
+** traverse heading mode
+   There is a mode called traverse-heading where we can move through the heading
+   we can enable using the command `:Neorg mode traverse-heading`
+   We can do this using the keybinding <Space> mn for normal and mh for traverse-heading
+
+** Table of contents
+   We can bring out the table of content in neorg using `:Neorg toc` command
+   we can also give a custom title for the table of content /check the top of the page for how to do this/
+   - ( ) Close the toc window after use core.qol.toc module
+
+* Journals + Summaries
+** Metadata generation
+   /Also install norg_meta Treesitter plugin using command :TSInstall norg_meta/
+*** Manual way
+    Writing everything inside @document.meta
+
+*** Automatic way
+    Using the command `:Neorg inject-metadata`
+
+** Creating a summary
+   To create a summary in neorg we need to have metadata in the files related to that workspace and after we have those we need to have `core.summary` plugins enabled in the config
+   Then we create a heading in `index.norg` file
+   With the cursor on that heading we run the command `:Neorg generate-workspace-summary` to generate the workspace summary
+
+** Journal
+   We configure to set a workspace where we want to keep our journal
+   Then we run the command `:Neorg jounral`
+   which then prompts us which file we wish to open we can also write to yesterday and tomorrow
+   We can use `:Neorg journal template` to create a template for our journal

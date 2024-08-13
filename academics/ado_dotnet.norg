@@ -1,0 +1,35 @@
+* Introduction
+  - SQL Server: relation database management system, developed and marketed by Microsoft
+  - built on top of SQL (standard programming langauge to interact with relational databases)
+  - it has additional features thanks to Transact-SQL or T-SQL
+
+* ADO.NET Basics
+  - it stands for ActiveX Data Objects
+  - it helps us to establish a connection betweeen the .NET application and the data sources (SQL Server, Oracle, MySQL) 
+  - it contains classes and methods to do so
+
+** Connection architectures in ADO.NET
+   - connected architecture
+   -- application remains connected to database throughout the processing
+   - disconnected architecture
+   -- automatically connects/disconnects during the processing, application uses temporary data on the client side called DataSet.
+
+** Important classes of ADO.NET
+   - Connection Class
+   -- to establish connection with the database
+   -- also handles transactions and pooling
+   - Command Class
+   -- provide methods for storing and executing SQL statements and stored procedures (collection of one or more commands)
+   --- ExecuteReader -> returns data to client as rows
+   --- ExecuteNonQuery -> executes command that changes the data on the database (update, delete or insert)
+   --- ExecuteScalar -> returns a single value such as count or other calculated values
+   --- ExecuteXMLReader -> used to read XML databases using XML stream and returns XML Reader object
+   - DataReader Class
+   -- retrieve data
+   -- used in conjunction with Command class
+   - DataAdaptor Class
+   -- connect DataSets to Databases
+   -- can also be used to establish a conenction between application and underlying database tables, views and stored procedures
+   - DataSet Class
+   -- collection of datatable objects (collection of data table and data rows)
+   -- also contains relations

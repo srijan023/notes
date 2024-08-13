@@ -1,0 +1,169 @@
+@document.meta
+title: Productivity Setup
+description: Primagen Productivity Setup
+authors: creatio
+categories:
+created: 2024-06-10T17:37:13+0530
+updated: 2024-06-11T23:30:24+0530
+version: 1.1.1
+@end
+
+* Docker
+  containerization
+  `sudo apt install docker.io`
+  `sudo snap install docker`
+
+  *The docker image I am using for this file*
+  /Dockerfile/
+  @code docker
+  FROM ubuntu:focal
+  ARG TAGS
+  WORKDIR /usr/local/bin
+  ARG DEBIAN_FRONTEND=noninteractive
+  RUN apt update && apt install -y software-properties-common && apt-add-repository -y ppa:ansible/ansible && apt-add-repository -y ppa:neovim-ppa/unstable && apt update && apt install -y curl git ansible build-essential neovim
+  COPY . .
+  CMD ["sh", "-c", "ansible-playbook $TAGS local.yml"]
+  @end
+
+  /nvim.Dockerfile/
+  @code docker
+  FROM ubuntu:focal
+  ARG TAGS
+  WORKDIR /usr/local/bin
+  ARG DEBIAN_FRONTEND=noninteractive
+  RUN apt update && apt install -y software-properties-common && apt-add-repository -y ppa:ansible/ansible && apt-add-repository -y ppa:neovim-ppa/unstable && apt update && apt install -y curl git ansible build-essential neovim
+  COPY . .
+  CMD ["sh", "-c", "ansible-playbook $TAGS local.yml"]
+  @end
+
+  /build-docker/
+  @code bash
+  #!/usr/bin/env bash
+  sudo docker build . -t new-computer
+  sudo docker build . -f nvim.Dockerfile -t nvim-computer
+  @end
+
+  *Command to build docker*
+  `./build-docker`
+
+  *Get into the docker image in bash mode*
+  `sudo docker run --rm -it nvim-computer bash`
+
+  *After install the oh-my-zsh change the line*
+  `plugins=(git zsh-autosuggestions)`
+
+* Ansible
+  when we get a new device it must not take more time to set it up for working
+  /Command to run the ansible script/
+  `ansible-playbook fem.yml(filename)`
+
+  - we can also give tags to run certain scripts at a time
+  - we can also make it modular
+
+** Ansible-vault
+   We can encrypt our files using ansible vault
+   `ansible-vault encrypt <filename>`
+
+   /password is set to test/
+
+   Decryption
+   `ansible-vault decrypt <filename>`
+
+   Particularly useful for ssh keys of git
+
+   *Complete setup using ansible*
+   `ansible-playbook -t tags --ask-vault-pass <filename.yml>`
+
+   /We can also store backup codes using ansible-vault/
+
+* Stow
+  managing the dot files
+  only manages symlinks
+  target directory is the parent of the stow directory
+  -Learn about stow more and integrate it better with ansible-
+** Installation
+   @code sh
+     sudo apt install stow
+   @end
+
+* Window manager
+  Navigation theory: as most as possible keys if not fuzzy finder
+
+* Shell
+
+* Tmux
+
+* Piping
+  when we do A | B the output of A is the input of B
+
+* FZF
+  - <C-r> gives you list of command history
+
+** find
+   find ~ ~/personal ~/work -mindepth 1 -maxdepth 1 -type d | fzf
+
+** Cheat sheet
+
+* Git
+** Worktree
+
+* Linux Core utils
+** sed
+** awk
+** sort
+** bc
+** rg
+
+* Git
+** Change the commit message of last commit
+   `git commit --amend -m "Changed message"`
+
+** Plumbing
+*** Log
+    This provides us information about different commits
+    `git log`
+    `git --no-pager log -n 10`
+*** Tree
+    - git's way of storing a directory
+*** Blob
+    - git's way of storing a file
+*** cat-file
+    - by default the content inside the git file are encrypted in some format and therefore simply using `cat` would not give us the required result therefore we use `cat-file`
+    - `git cat-file -p <commit-hash>` would give us all the information about a single commit
+    -- example:
+        @code text
+          ❯ git cat-file -p b2a63b2c7563ac04b2fabf5b2530597fb75951c6
+            tree 5b21d4f16a4b07a6cde5a3242187f6a5a68b060f
+            author srijan023 <gyawalisrijan01@gmail.com> 1718095343 +0545
+            committer srijan023 <gyawalisrijan01@gmail.com> 1718095343 +0545
+
+            A: add contents.md
+        @end
+    - if we replace `<commit-hash>` with the `<tree-hash>` we get information about the tree instead, this gives us information about the file structure
+    -- example:
+        @code text
+          ❯ git cat-file -p 5b21d4f16a4b07a6cde5a3242187f6a5a68b060f
+            100644 blob ef7e93fc61a91deecaa551c4707e4c3049af42c9    contents.md
+        @end
+    - if we wish to see the content of the file we can replace `<tree-hash>` with `<blob-hash>`
+    -- example:
+        @code text
+          ❯ git cat-file -p ef7e93fc61a91deecaa551c4707e4c3049af42c9
+            # contents
+        @end
+
+    - if we make multiple commits and then run the `cat-file` command on the last commit we get one additional field from the above three, *parent* which is the previous commit
+    -- example
+        @code text
+          ❯ git cat-file -p b71b797e2722b56a6d524dd9c219fa10289c825b
+            tree 6398baa1555dc11c9eb9a439aabf303f13dbef10
+            parent b2a63b2c7563ac04b2fabf5b2530597fb75951c6
+            author srijan023 <gyawalisrijan01@gmail.com> 1718097381 +0545
+            committer srijan023 <gyawalisrijan01@gmail.com> 1718097381 +0545
+
+            B: add titles
+        @end
+
+
+
+    *_Reached: Chapter 3: Storing data_*

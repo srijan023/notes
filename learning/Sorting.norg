@@ -1,0 +1,15 @@
+@document.meta
+title: Sorting
+description:
+authors: creatio
+categories:
+created: 2024-07-08T19:43:57+0530
+updated: 2024-07-08T20:08:42+0530
+version: 1.1.1
+@end
+
+{:Selection Sort:}
+{:Insertion Sort:}
+{:Bubble Sort:}
+{:Merge Sort:}
+{:Quick Sort:}

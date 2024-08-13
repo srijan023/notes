@@ -1,0 +1,269 @@
+* Introduction
+  This is used to store the information
+  User hits the backend server, backend server hits the batabase for information, user can't talk to the database directly
+  In real world projects there are multiple distributed databases
+
+** Types of databases
+   - Graph
+   -- Stores data as links and graphs
+   -- Example: neo4j
+   - Vector
+   -- Stores data in form of vectors
+   -- Lets you do similarity search
+   -- Useful in machine learning
+   -- Example: pinacone
+   - SQL
+   -- Stores datas in the form of rows
+   -- Most fullstack application use this
+   -- example: MySQL, Postgres
+   - NoSQL
+   -- Stores data in schema-less fashion
+   -- Extremely lean and fast way to store data
+   -- Example: MongoDB
+
+** MongoDB
+   - Mongodb lets you create database
+   - Each database can contain multiple tables
+   - Each table is where we dump JSON data
+   - It is schema less
+   - It is a NoSQL type database
+
+     password: LW59jOJzSIu0uNWO
+
+** Connecting to the database
+   - {https://mongoosejs.com/}[Mongoose] lets you connect to the database
+
+   @code javascript
+     const mongoose = require("mongoose");
+     const express = require("express");
+
+     const app = express();
+
+     app.use(express.json());
+
+     mongoose.connect(
+       "mongodb+srv://srijangyawali101:LW59jOJzSIu0uNWO@learningweb.ebnmq5t.mongodb.net/userapptrial",
+     );
+
+     // creating a schema
+     const User = mongoose.model("Users", {
+       name: String,
+       email: String,
+       password: String,
+     });
+
+     app.post("/signup", function (req, res) {
+       const username = req.body.username;
+       const name = req.body.name;
+       const password = req.body.password;
+
+       // check if the user already exists
+       // READ from CRUD
+       const existingUser = User.find({ email: username });
+
+       if (existingUser) {
+         res.status(400).send("user already exists");
+       }
+
+       // CREATE from CRUD
+       const user = new User({
+         name: name,
+         email: username,
+         password: password,
+       });
+
+       user.save();
+
+       res.json({
+         msg: "User created successfully",
+       });
+     });
+  @end
+
+** Filtering based on regex
+   {https://stackoverflow.com/questions/3305561/how-to-query-mongodb-with-like}[Like operation of sql in mongoose]
+** Or operation in mongoose
+   {https://stackoverflow.com/questions/7382207/mongooses-find-method-with-or-condition-does-not-work-properly}[Or operation in mongoose]
+
+** Why don't we let user hit the database directly and use the server
+   - Databases were created using protocols that browsers don't understand
+   - Databases don't have granular access as a first class citizen. Very hard to do user specific access in them
+   - There are some databases (firebase) that let you get rid of the http server and try their best to provide granular access
+
+** Mongodb is schemaless but mongoose makes us create a schema, why?
+   - schema - structure of data that we put inside.
+   - some databases need us to tell the schema before we insert data (SQL) therefore called Structured
+   - mongoose makes the database more strict than the mongodb original nature which provide some layer of protection that random data won't be inserted
+   - also autocompletion would be seen
+
+   /To learn more about mongodb database check the assignment of week-3/
+
+** Why not NOSQL
+   Although its schema-less property makes it ideal to for bootstraping a project fast such as for the case of Hacakathons but as your app grows, this property makes it very easy for data to get corrupt.
+
+   @code javascript
+   // Correct data
+   _id: ObjectId('n7029fkj3450697')
+   userId: n7029kfj3450697
+   balance: 232.1381
+   __v: 0
+
+   // Incorrect data
+   _id: ObjectId('a324kjds2039jkdf')
+   userId: a324kjds2039jkdf
+   amountBalance: 241.1514
+   __v: 0
+
+   // Incorrect data
+   _id: ObjectId('o2kdf93js1912941')
+   userId: o2kdf93js1912941
+   balance: "hello"
+   __v: 0
+   @end
+
+   - Can lead to inconsistent database
+   - Can cause runtime errors
+   - Is to flexible for an app that needs strictness
+
+   /*You might think that `mongoose` does add strictness to the codebase because we used to define a schema there. That strictness is present at the Nodejs level, not on the DB level. You can still put in erroneous data in the database that doesn't follow that schema*/
+
+
+** Why SQL
+   - Requires to define you schema upfront
+   - Put in data that follows that schema
+   - Allows us to update the data as the application changes and perform migrations
+
+** Using Postgresql
+*** Creating the database
+    - We can create a sample database using neon
+    - We can also create a database locally
+
+*** Connecting to the database
+    - We can use `psql` which comes as a package while you install Postgres on you system locally
+      `psql 'postgresql://role:password@host_name/db_name'`
+
+    - Or we can use `pg` which is a node package
+
+*** Creating a table
+    SQL stands for /Structured Query Language/ and therefore it needs to have strict structure which is defined using the schema
+
+    @code javascript
+    CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+    @end
+
+**** `CREATE TABLE users`
+     This command initiates the creation of a new table in the database named `users`.
+
+**** `id SERIAL PRIMARY KEY`
+     - `id`: The name of the first column in the users table, typically used as a unique identifier for each row (user). Similar to `_id` in mongodb
+     - `SERIAL`: A PostgreSQL-specific data type for creating an auto-incrementing integer. Every time a new row is inserted, this value automatically increments, ensuring each user has a unique id.
+     - `PRIMARY KEY`: This constraint specifies that the id column is the primary key for the table, meaning it uniquely identifies each row. Values in this column must be unique and not null.
+
+**** `created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`
+     - `created_at`: The name of the fifth column, intended to store the timestamp when the user was created.
+     - `TIMESTAMP WITH TIME ZONE`: This data type stores both a timestamp and a time zone, allowing for the precise tracking of when an event occurred, regardless of the user's or server's time zone.
+     - `DEFAULT CURRENT_TIMESTAMP`: This default value automatically sets the `created_at` column to the date and time at which the row is inserted into the table, using the current timestamp of the database server.
+
+*** Performing operations on the database
+**** Insert into table
+     @code js
+       INSERT INTO users (username, email, password)
+       VALUES ('username_here', 'user@example.com', 'user_password');
+     @end
+
+**** Update on the table
+     @code js
+       UPDATE users
+       SET password = 'new_password'
+       WHERE email = 'user@example.com';
+     @end
+
+**** Delete from table
+     @code js
+       DELETE FROM users
+       WHERE id = 1;
+     @end
+
+**** Selecting from table
+     @code js
+       SELECT * FROM users
+       WHERE id = 1;
+     @end
+
+*** Relations in SQL database
+    Relationships in SQL database is created through the use of `Foreign Keys`
+    {https://projects.100xdevs.com/tracks/YOSAherHkqWXhOdlE4yE/sql-11}[Notes on relationships in SQL database]
+
+    @code javascript
+      CREATE TABLE users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE addresses (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          city VARCHAR(100) NOT NULL,
+          country VARCHAR(100) NOT NULL,
+          street VARCHAR(255) NOT NULL,
+          pincode VARCHAR(20),
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+    @end
+
+    `ON DELETE CASCADE` this means that if the original user from the `users` table get deleted then the related addresses from the address table also gets deleted
+
+    Inserting Getting values from the second table
+    @code javascript
+      INSERT INTO addresses (user_id, city, country, street, pincode)
+      VALUES (1, 'New York', 'USA', '123 Broadway St', '10001');
+    @end
+
+    @code javascript
+      SELECT city, country, street, pincode
+      FROM addresses
+      WHERE user_id = 1;
+    @end
+
+
+*** JOINS In SQL database
+    {https://projects.100xdevs.com/tracks/YOSAherHkqWXhOdlE4yE/sql-11}[Notes on Joins on SQL databases]
+
+    It helps to get infomration from two related tables.
+
+    We just don't want the user data most of the time, we want the address or any other similar data as well. For such cases we can do this using to different approach.
+    1. We can first fetch the user info and then fetch the address info, though it works its not an optimized approach.
+    2. We join those two tables and run the query to fetch the complete information.
+
+    @code javascript
+      SELECT users.id, users.username, users.email, addresses.city, addresses.country, addresses.street, addresses.pincode
+      FROM users
+      JOIN addresses ON users.id = addresses.user_id
+      WHERE users.id = '1';
+    @end
+
+    We can also get aliases an make it better as
+
+    @code javascript
+      SELECT u.id, u.username, u.email, a.city, a.country, a.street, a.pincode
+      FROM users u
+      JOIN addresses a ON u.id = a.user_id
+      WHERE u.id = YOUR_USER_ID;
+    @end
+
+**** Types of Joins
+***** INNER Join
+***** LEFT Join
+***** RIGHT Join
+***** FULL Join
+

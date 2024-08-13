@@ -1,0 +1,65 @@
+@document.meta
+title: index
+description: All the development and other learning related stuff are provided here
+authors: creatio
+categories: learning
+created: 2024-06-07T18:44:46+0530
+updated: 2024-07-10T00:26:55+0530
+version: 1.1.1
+@end
+
+{:Productivity Setup:}
+
+* Cohort 2.0
+  {:Foundation:}
+  {:Advanced JavaScript:}
+
+** Frontend
+   {:Fetch:}
+   {:DOM:}
+
+*** React
+    {:React Fundamentals:}
+    {:React shallow-depth:}
+    {:React Hooks:}
+    {:Hooks with examples:}
+    {:React Routing:}
+    {:Lazy Loading:}
+    {:Prop drilling:}
+    {:Context API:}
+    {:State management:}
+
+**** Topics to learn on our own
+     {:Suspense:}
+     {:ErrorBoundary:}
+
+** Typescript
+   {:TS_Introduction:}
+   {:Prisma:}
+
+** Backend
+   {:Node.js:}
+   {:Middlewares:}
+   {:Authentication and Zod:}
+   {:Authentication:}
+   {:Databases:}
+   {:Transaction in database:}
+   {:Serverless backend:}
+
+
+* Java Development
+  {:Setting up the java environment:}
+
+* DSA
+  {:Hashing:}
+  {:Sorting:}
+
+* Project
+  {:rsync algorithm:}
+  {:SHA-256:}
+
+* Machine Learning
+  {:Supervised Learning:}
+
+* Additional tools
+  {:git and version control:}

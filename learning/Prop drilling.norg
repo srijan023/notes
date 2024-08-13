@@ -1,0 +1,78 @@
+** Before we begin, how do you think one should manage state?
+   - ( ) Keep everything in a top level component
+   - (x) Keep everythign as low as possible
+
+*** Original code
+    @code javascript
+      import { useState } from "react"
+
+      function App() {
+        const [count, setCount] = useState(0);
+        return <div>
+          <Count count={count} setCount={setCount} />
+          <Button setCount={setCount} count={count} />
+        </div>
+      }
+
+      function Count({ count, setCount }) {
+        return <>
+          <h1>{count}</h1>
+        </>
+      }
+
+      function Button({ setCount, count }) {
+        return <div>
+          <button onClick={() => {
+            setCount(count + 1)
+          }}>Increase</button>
+          <button onClick={() => {
+            setCount(count - 1)
+          }}>Decrease</button>
+        </div>
+      }
+
+    @end
+
+    - what if the client said the button component has to be inside of count component
+
+    This is an example of props drilling because Count is just passing the state variables are passed to the child which is of no use to this component,
+    this has no impact on re-rendering and optimization,
+    this is just for code beauty and it may make code verbose and inconvinient
+
+    *context api helps to solve this problem*
+
+    @code javascript
+
+      import { useState } from "react"
+
+      function App() {
+        const [count, setCount] = useState(0);
+        return <div>
+          <Count count={count} setCount={setCount} />
+        </div>
+      }
+
+      function Count({ count, setCount }) {
+        // props drilling
+        return <>
+          <h1>{count}</h1>
+          <Button setCount={setCount} count={count} />
+        </>
+      }
+
+      function Button({ setCount, count }) {
+        return <div>
+          <button onClick={() => {
+            setCount(count + 1)
+          }}>Increase</button>
+          <button onClick={() => {
+            setCount(count - 1)
+          }}>Decrease</button>
+        </div>
+      }
+
+
+    @end
+
+
+

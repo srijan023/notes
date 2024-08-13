@@ -1,0 +1,136 @@
+@document.meta
+title: Middlewares
+description:
+authors: creatio
+categories:
+created: 2024-07-08T23:28:02+0530
+updated: 2024-07-09T01:23:54+0530
+version: 1.1.1
+@end
+
+
+* What are middlewares?
+  Taking an example of an hospital we don't direcly visit the doctor, we first fill up the form, get our vitals recorded and only then we visit the doctor. If doctors are to be considered the actual function of the backend program then everything that happend before it are the middlewares.
+  In real world backend program following things can happen in the middleware:
+  - Check for user authentication
+  - Validity of user input
+
+  @code javascript
+   // no middleware version
+  app.get("/health-checkup", function (req, res) {
+    const kidneyId = req.query.kidneyId;
+    const username = req.headers.username;
+    const password = req.headers.password;
+
+    if (username != "srijan" || password != "1234") {
+      res.status(403).json({
+        msg: "user does not exists",
+      });
+      return;
+    }
+
+    if (kidneyId != 1 && kidneyId != 2) {
+      res.status(411).json({
+        msg: "Wrong inputs",
+      });
+      return;
+    }
+
+    res.send("Your heart is healthy");
+  });
+  @end
+
+  This violates the DRY philosophy as validation has to be done for every request separately, even if we create a function it has to be repeated.
+
+  @code javascript
+    // using middleware
+    function userValidationMiddleware(req, res, next) {
+      const username = req.headers.username;
+      const password = req.headers.password;
+      if (username != "srijan" || password != "pass") {
+        res.status(403).json({
+          msg: "user validation failed",
+        });
+      } else {
+        next();
+      }
+    }
+
+    function kidneyValidationMiddleware(req, res, next) {
+      const kidneyId = req.query.kidneyId;
+      if (kidneyId != 1 && kidneyId != 2) {
+        res.status(411).json({
+          msg: "Wrong inputs",
+        });
+      } else {
+        next();
+      }
+    }
+
+    app.get(
+      "/health-checkup",
+      userValidationMiddleware,
+      kidneyValidationMiddleware,
+      (req, res) => {
+        // this function can also have next if it is a middleware but in this case it is the final function we want to run on this route
+        res.send("Your heart is healthy");
+      },
+    );
+  @end
+
+* `app.use()`
+  `app.use()` means that the middleware is called in every route.
+  One of the best example for this is the `json` parser middleware
+
+  @code javascript
+    app.use(express.json())
+  @end
+
+  @code javascript
+    app.use(myMiddlewareName);
+  @end
+
+* global catches
+  If we have some error in the server we don't want the end user to see those error rather want to send some clean message to the frontend. We have to place it at the end after we have defined all the routes and before `app.listen()`
+  @code javascript
+    // global catches
+    app.use(function (err, req, res, next) {
+      res.json({
+        msg: "Sorry something is up with our server",
+      });
+    });
+  @end
+
+
+
+* Tasks
+** Count the total number of requests
+** Find the average time your server is taking to handle requests
+
+* Questions
+** Why does `app.use(express.json())` is a function call but `app.use(customMiddleware)` not
+   This is because `express.json()` itself return a middleware which would be used here.
+   @code javascript
+     function json(){
+       return function(req, res, next){
+         // something here
+       }
+     }
+   @end
+
+** What if we want to pass values from one middleware to another middleware
+   @code javascript
+     function firstMiddleware(req, res, next) {
+       req.myValue = "this is the custom value"
+
+       // do something here
+       next();
+     }
+
+     function secondMiddleware(req, res, next) {
+       const myValue = req.myValue
+       // do something here
+       next();
+     }
+  @end
+

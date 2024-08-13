@@ -1,0 +1,204 @@
+* Introduction
+  It is a programming language developed and maintained by Microsoft
+  It is a strict `syntactical superset` of JavaScript and adds optional static typing to the language.
+  Typescript does not run on the browser. It is compiled to `JavaScript`, when Typescript is converted to JavaScript we get `type-checking`
+  `tsc` is the official TypeScript compiler
+
+** Basic Types in TypeScript
+   - number
+   - string
+   - boolean
+   - null
+   - undefined
+
+** Creating a typescript project
+
+
+** Configuration of `tsconfig` file
+*** Target
+    The `target` option in a `tsconfig.json` file specifies the ECMAScript target version to which the TypeScript compiler will compile the TypeScript code.
+    /We can convert arrow functions to plain old JavaScript function which is not supported on older browsers/
+
+*** rootDir
+    Where the TypeScript files are resided
+    commonly called `src`
+
+*** outDir
+    Where the compiled JavaScript files are stored
+    /commonly called `dist` or `build`/
+    /they are gitignored github only stores the src files/
+
+*** noImplicitAny
+    In the codebase there should not be any implicit any meaning we need to pass type to every thing.
+    Setting this to false, `any` would be given implicitly to anything we don't specify
+
+*** removeComments
+    don't put comments in the final compiled JavaScript files
+
+** Interfaces
+   How can you assign types to objects? For example a user object that looks like this:
+   @code javascript
+   const user = {
+     firstName: "srijan",
+     lastName: "gyawali",
+     email: "srijangyawali01@gmail.com"
+     age: 23
+   }
+   @end
+
+   To assign a type to the `user` object, we create an `interface`
+   @code typescript
+   interface User {
+     firstName: string,
+     lastName: string,
+     email?: string,
+     age: number
+   }
+   @end
+
+   /Here email is optional/
+
+*** Implementing interfaces
+    We can also implement Interface as a class
+    @code typescript
+    interface Person{
+      name: string,
+      age: number,
+      greet(phrase: string):void,
+    }
+    @end
+
+    @code typescript
+    class Employee implements Person{
+      name: string;
+      age: number;
+
+      constructor(n: string, a: number){
+        this.name = n;
+        this.age = n;
+      }
+
+      greet(phrase: string){
+        console.log(`${phrase} ${this.name}`)
+      }
+    }
+    @end
+
+    *Difference between {** Interface} and a {** Types} is that interface can be implemented with class but type can't be*
+
+    /This is same as in Java because now we will need to implement that greet function/
+
+** Types
+   They can be used as {** interfaces} to group the types in an object.
+
+   @code typescript
+   type User = {
+     firstName: string,
+     lastName: string,
+     age: number
+   }
+   @end
+
+   *NOTE: Here we use the = sign where as in interface we don't*
+
+   *Also Types let you do this*
+   @code typescript
+   type greet = number | boolean | string
+   @end
+
+   *similar to this | operator we can also use & operator and only types let you do that*
+
+*** Union
+    Using | is union
+
+*** Intersection
+    Using & is intersection
+
+** Arrays
+   @code javascript
+    interface Todo {
+      title: string,
+      description: string,
+      isDone: boolean
+    };
+
+    interface TodoComponentProps {
+      todos: Todo[]
+    }
+
+    const myTodos: Todo[] = [
+      {
+        title: "First todo",
+        description: "This is my first todo",
+        isDone: false
+      },
+      {
+        title: "Second todo",
+        description: "This is my second todo",
+        isDone: true
+      },
+      {
+        title: "Third todo",
+        description: "This is my third todo",
+        isDone: true
+      },
+    ]
+
+    function App() {
+      return (
+        <>
+          Hello world
+          <div>
+            <TodoComponent todos={myTodos} />
+          </div>
+        </>
+
+      )
+    }
+
+    function TodoComponent(props: TodoComponentProps) {
+      return <div>
+        {props.todos.map(todo => {
+          return <div>
+            <h1>todo.title</h1>
+            <h2>todo.description</h2>
+            {todo.isDone ? <p>DONE</p> : <p>NOT DONE</p>}
+          </div>
+        })}
+      </div>
+    }
+
+    export default App
+   @end
+
+** Enums
+   They let you define a set of named constraints.
+   The concept of enums is to represent the set of constants as a human readbale form which otherwise by denoted by some number or a string.
+
+** Generics
+   They are the language independent concept
+   It is basically templating in C++
+
+** Importing and Exporting
+*** Default Exporting and Importing
+    @code javascript
+    export default function(){}
+    @end
+
+    @code javascript
+    import defaultFunc from "./exportedFile"
+    @end
+
+*** Non default exports and imports
+    @code javascript
+    export const a = 1;
+    export const b = 2;
+    @end
+
+    @code javascript
+    import {a, b} from "./exportedFile"
+    @end
+
+
+
+

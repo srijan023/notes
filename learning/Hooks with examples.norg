@@ -1,0 +1,140 @@
+* Reconciliation
+  example:
+  You give docs to the CA -----> He reconciles all deposits/ withdrawls / interest gains ----> tell you final revenue, expenses and profits
+
+  use:
+  react works similar to this
+  You write the state management code -----> react uses the information about the states ----> renders and re-renders the DOM accordingly
+
+  Can you file the tax yourself and do everything a CA does -> yes, but its a difficult job and CA is better than you in it
+  Should you do it yourself -> no
+
+  What do we give react -> The state
+  How often does the react re-render -> any time state changes
+
+** Basic react code
+
+   @code javascript
+    import { useState } from 'react'
+
+    function App() {
+      const [count, setCount] = useState(0)
+
+      return (
+        <>
+          <button onClick={function() {
+            setCount(count + 1)
+          }}>{count}</button>
+        </>
+      )
+    }
+
+    export default App
+   @end
+
+* UseEffect
+  How do you get all your docs needed to be submitted to your CA, more importantly how many times do you get the same docs?
+  - When you're filling taxes, you might need to get your data from various sources before you give it to your CA (side effects) _not connected to re-rendering_
+  -- You might have to wait for 10 days before you can talk to bank manager
+  -- You might have to go to your exchange broker's office to get your trading information
+  -- You will update your CA with this information as you get it
+
+  Q. Will you get the same data more than once in a single year? -> NO
+
+  But in react if we write a `fetch` function and update the state based on that fetch function then it triggers re-rendering which again triggers the fetch function and we are stuck in an infinite loop of re-rendering and fetching
+  To prevent this we use `useEffect()`
+
+* UseMemo
+  Let's say you have crypto staored in 3 different exchanges (CoinDCX / WazierX/ Binance)
+  You got the returns from all three places
+  You added them and gave it to the CA
+  Now you got your income report
+
+  Now, after the income report is provided to you by the bank, will you again sum all your crypto returns? -> NO
+
+  this is where we use `useMemo` hook, when the collection or processing of one data is completely independent of the another data, _here crypto data is independent of income statement_ we store the value of one data and don't re-fetch it or re-calculate it.
+
+* UseCallback
+  If we ever want to memoize the function then we use `useCallback`
+  - `useCallback` unlike `useMemo` is not about minimizing the amount of code that is run, rather its about not rendering a child component, if the function hasn't/doesn't need to change across renders.
+
+  /The child of the parent component in react would re-render when the parent re-renders even if the props are not changed or even if they don't accept any props/
+  For this we use `React.memo` *This is different from `useMemo`*
+  This makes, react child component re-render only if the props value are changed.
+
+  However in case of child that accept functions, object or any other type of data that are passed as reference, those values are re-defined when the parent component re-renders, this means that the props for the child has changed. This causes the child to re-render. To prevent this we use `useCallback`
+
+
+* UseRef
+  It is used in accessing DOM elements
+
+  Lets say you want to do some tax envasion
+  You want to override what your CA calcuated as your income tax
+  How would you do it? You would report an incorrect value to the government
+
+* Example code
+  @code javascript
+    import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+    function App() {
+      const [exchange1Data, setExchange1Data] = useState({});
+      const [exchange2Data, setExchange2Data] = useState({});
+      const [bankData, setBankData] = useState({});
+      const incomeTaxRef = useRef();
+
+      useEffect(() => {
+        // Some operation to get the data
+        setExchange1Data({
+          returns: 100
+        });
+      }, [])
+
+      useEffect(() => {
+        // Some operation to get the data
+        setExchange2Data({
+          returns: 100
+        });
+      }, [])
+
+      useEffect(() => {
+        // Some operation to get the data
+        setTimeout(() => {
+          setBankData({
+            income: 100
+          }, 5000);
+        })
+      }, [])
+
+      const calculateCryptoReturns = useCallback(() => {
+        return exchange1Data.returns + exchange2Data.returns;
+      }, [exchange1Data, exchange2Data])
+
+      const cryptoReturns = useMemo(() => {
+        return exchange1Data.returns + exchange2Data.returns;
+      }, [exchange1Data, exchange2Data])
+
+      const incomeTax = (cryptoReturns + bankData.income) * 0.3
+
+      function handleRefManipuation() {
+        incomeTaxRef.current.innerHTML = "F**k paying taxes."
+      }
+
+      return (
+        <div>
+          <h1 ref={incomeTaxRef}>
+            hi there, your income tax returns are {incomeTax}
+          </h1>
+          <CryptoInfo calculateIncome={calculateCryptoReturns} />
+          <button onClick={handleRefManipuation}>Change your tax info</button>
+        </div>
+      )
+    }
+
+    const CryptoInfo = function({ calculateIncome }) {
+      return <div>
+        The income from crypto is {calculateIncome()}
+      </div>
+    }
+
+    export default App
+  @end

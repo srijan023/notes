@@ -1,0 +1,21 @@
+* Jargons
+  - _Single page applications_
+    React is a single page application, what does this mean?
+  -- This means only the first time there is hard reload of the website, all html css and js is received on the first pass and only the contents are being changed.
+  -- This is *client side routing*
+
+  - _Client side bundle_
+    It is the bundle that we recieve from the backend, it is the bundle of html, css and js which contains information about every page in the website.
+
+** What are routes?
+   `url/something` is the route
+
+** How to do routing in react?
+   It is done popularly by using `react-router-dom`
+   {https://reactrouter.com}[react-router-dom]
+
+** How to create a navigation menu?
+   To create a navbar we use the `useNavigate()` hook.
+   The other option would be to use `window.location.href` but this would cause the page to reload which is not what we want in client side routing
+   /One important thing to understand is that `useNavigate()` hook can only be used inside `<BrowserRouter>` component/
+   For details check the week7 `react-router-dom` project

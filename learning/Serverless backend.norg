@@ -1,0 +1,257 @@
+@document.meta
+title: Serverless backend
+description:
+authors: creatio
+categories:
+created: 2024-08-12T17:48:35+0530
+updated: 2024-08-12T17:48:35+0530
+version: 1.1.1
+@end
+
+* Introduction
+  Deployment of the backend code requires a server
+  Some of the popular one are `AWS`, `Azure`, `Cloudfare`
+  - You rent a virtual machine on those server and host in there.
+  - Put it on auto scaling group
+  - Deploy it in a Kubernetes cluster
+
+  There is some downside in doing that:
+  - Taking care of how/when to scale
+  - Base cost even if no one is visiting our website
+  - Monitoring various servers to make sure no server is down
+
+  What if we only write the code and someone else take care of all this.
+
+  *Serverless* is a backend deployment in which the /cloudmanager/ dynamically manages the allocation and provisioning of servers. The term /serverless/ does not mean there are no servers involved. It means that developers and operators do not have to worry about the servers.
+
+  _Easier Definition_
+  What if you could just write your `express routes` and run a command. The app would automatically
+  - Deploy
+  - Autoscale
+  - Charge you on a `per request` basis (rather than you paying for VMs)
+
+  _Problems_
+  - More expensive to scale
+  - Cold start problem
+    Not gonna charge us and server is not allocated when no one is visiting the server. So when someone suddenly visits the website it has to start the server from start and it takes time and there is high latency. /First request faces the cold request problem/
+  -- _solutions:_
+  --- auto scale after the first server meaning keep one server always open
+  --- keep pinging your server every 5 minutes or so.
+
+  Famous serverless providers are:
+  - AWS lambda
+  - Google Cloud functions
+  - Cloudflare workers
+
+** when to use serverless backend
+   - When you have to get off the ground fast and don't want to worry about deployments
+   - When you can't anticipate the traffic and don't want to worry about autoscaling
+   - If you have very low traffic and want to optimize for cost
+
+* Using Cloudfare
+  - Create a cloudfare account
+  - Create a new worker
+  - Deploy the worker (takes time wait until it is up)
+
+** How cloudfare workers work
+   /Cloudfare workers *DONOT* use the Node.js runtime. They have created their own runtime. There are alot of things that Node.js has because we don't want two different processes to start two Node instances/
+
+   /If we create a new worker project locally and watch its dependencies we don't find experss there which means it does not use express for the backend logic/
+
+   {https://developers.cloudflare.com/workers/reference/how-workers-works/#:~:text=Though%20Cloudflare%20Workers%20behave%20similarly,used%20by%20Chromium%20and%20Node}[More about this here]
+
+* Creating a project locally
+** Intializing a worker
+   @code bash
+   npm create cloudflare -- app-name
+   @end
+
+   Use typescript, git and don't deploy
+
+** Start the worker locally
+   @code bash
+   npm run dev
+   @end
+
+** Basic backend code on cloudflare
+   @code typescript
+     export default {
+       async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+         // the native fetch function provides access to everything but it is not good code to write
+         //console.log(request.body);
+         //console.log(request.headers);
+         //console.log(request.method);
+
+         console.log("-------------NET REQUEST ----------------------")
+         let uri = request.url.replace(/^http:\/\/.*?\//gi, "/");
+         console.log(uri);
+
+         if (request.method === "GET") {
+           if (uri === "/users") {
+             return Response.json({
+               message: "You are on the users page."
+             });
+           }
+           return Response.json({
+             message: "you sent a get request"
+           });
+         } else {
+           return Response.json({
+             message: "you did not send a get request"
+           });
+         }
+       },
+     };
+   @end
+
+   - Why are we using `Promise<Response>` rather than just using `Response` as a return type?
+     This is because, this function internally performs some asynchronous tasks which therefore does not just returns the reponse but the promise of the response.
+
+     _*/Any async function will return the promise of some generic type/*_
+
+   Here the request object contains every information required but getting the information from the request object and handling the request accordingly is not an opital way to do the project.
+
+** Deploying the project from terminal
+*** Login to cloudflare using wrangler
+    @code bash
+    npx wrangler login
+    @end
+
+    This will open up a new link on the browser.
+    Accept the warning page to login
+
+*** Getting the user info
+    We can get the user info from the terminal using the command
+
+    @code bash
+    npx wrangler whoami
+    @end
+
+*** Actually deploy the project
+    To deploy the project we run the command
+    @code bash
+    npm run deploy
+    @end
+
+** Using express inside cloudfare
+   - _Response 1_
+     It’s unlikely you’ll see specifically express on Workers due to its deep Node.js dependencies, however there are a lot of options that you’ll probably feel right at home with, and have very similar APIs to something like Express. To name just a few:
+     GitHub - honojs/hono: Ultrafast web framework for Cloudflare Workers, Deno, Bun, and Node.js. Fast, but not only fast. 1.3k
+     GitHub - lukeed/worktop: The next generation web framework for Cloudflare Workers 508
+     GitHub - kwhitley/itty-router: A little router. 400
+
+   - _What if we really want to deploy our express project to cloudflare_
+     If you really need to deploy Node.js app I would search for more classic serverless options. (Which do not have their own runtime implemented). If you can split your app into small components and don't need to rely heavily on Node.js, Cloudflare workers are an amazing option and there are routing libraries for them as well. (to replace express)
+
+   @code typescript
+   // express code
+   app.get("/users", middleware, (req, res) => {
+     const userId = req.usreId;
+     const user = await getUser(userId);
+     res.json({
+       user
+     })
+   })
+
+   // cloudflare code
+   export default{
+     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response>{
+       const id = request.body.id;
+       const user = await getUser(id);
+       return Response.json({
+         user
+       })
+     }
+   }
+   @end
+
+   Here, we implement the `getUser` function separate which is concerned with the communication with the database on a different file, thus if we change a very small part of the program we can transfer our express code to cloudflare
+
+
+* Using Hono for better code
+** Creating a hono project
+   @code bash
+   npm create hono@latest hono-app
+   @end
+
+** Routing
+   Explained from the code below
+
+** Body
+   @code typescript
+     app.get('/', async (c) => {
+       const body = await c.req.json()
+       console.log(body);
+       return c.text('Hello Hono!')
+     })
+   @end
+
+** Headers
+   @code typescript
+     app.get("/readHeaders", someRandomMiddleware, (c) => {
+       const authHeader = c.req.header("Authorization");
+       console.log(authHeader);
+       return c.json({
+         headerInfo: authHeader
+       })
+     })
+   @end
+
+
+** Query Parameters
+   @code typescript
+     app.get("/readQuery", (c) => {
+       const param = c.req.query("param");
+       return c.json({
+         param
+       })
+     })
+   @end
+
+** Middlwares
+*** Universal middlewares
+    @code typescript
+      async function AuthenticationMiddleware(c: any, next: any) {
+        if (c.req.header("Authorization")) {
+          await next();
+        } else {
+          return c.json({
+            msg: "User authentication failed"
+          })
+        }
+      }
+
+      app.use(AuthenticationMiddleware);
+    @end
+
+*** Specific middlewares
+    @code typescript
+      async function someRandomMiddleware(c: any, next: any) {
+        console.log("this is a random middleware");
+        await next();
+      }
+
+      app.get("/readHeaders", someRandomMiddleware, (c) => {
+        const authHeader = c.req.header("Authorization");
+        console.log(authHeader);
+        return c.json({
+          headerInfo: authHeader
+        })
+      })
+    @end
+
+    _Why are we awaiting the `next()`_
+    If we want to run something after the `next()` function call we can use the `await` else it is not required.
+
+    @code typescript
+      async function someRandomMiddleware(c: any, next: any) {
+        console.log("this is a random middleware");
+        const initTime = new Date();
+        await next();
+        const totalTime = new Date().getTime() - initTime.getTime() / 1000;
+        console.log(`It took ${totalTime} to process the middleware`)
+      }
+    @end
+
+** Connecting to databases
+

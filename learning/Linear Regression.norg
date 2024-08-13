@@ -1,0 +1,46 @@
+@document.meta
+title: Linear Regression
+description:
+authors: creatio
+categories:
+created: 2024-08-02T13:08:42+0530
+updated: 2024-08-02T13:08:42+0530
+version: 1.1.1
+@end
+
+* History of Linear Regression
+  - The history is somewhat muddled
+  - Linear regression based on least square came out as a need for mathematically improving navigation methods based on astronomy duing of /Age of Exploration/ in 1700s.
+  - In 1722 = Roger Cotes: combining different observations yields better estimates of the true values.
+  - In 1750 = Tobias Mayer: averaging different results under similar conditions in studying librations of the moon
+  - In 1757 = Roger Joseph Boscovich: combining observations for studying the shape of the Earth
+  - In 1788 = Pierre-Simon Laplace: similar averaging theories in explaning the differences of motion between Jupiter and Saturn
+  - In 1805 = Adrien-Marie Legendra: First public exposition on Linear regression with least square method
+
+{https://imgs.search.brave.com/1pbnAbOE4mQQaz0StYKWz0rblk3Lm9DeTc62qYk1U5I/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/bm5kYi5jb20vcGVv/cGxlLzg5MS8wMDAw/OTM2MTIvbGVnZW5k/cmUtMS1zaXplZC5q/cGc}[Most famous image]
+{https://imgs.search.brave.com/-So4Vovm4KxCM6l-2C_lM1OO0A3NaTiDpHOVNhKQVB0/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy8w/LzAzL0xlZ2VuZHJl/LmpwZw}[Actual image]
+
+  - In 1808 = Robert Adrian: Publishes his formulation of least square method
+  - In 1809 = Carl Fierdrich Gauss: Publishes methods for calculating orbits of celestial bodies claming he invented least square method in 1975 (which had the same formulae as of Robert Adrian) and didn't publish it thinking its too obvious.
+  -- He was born in 1777 so he must be 18 years old (too good to be true but can't be completely ruled out as he was a child prodigy in Mathematics)
+
+* What is Linear Regression
+  - Linear regression implies some straight line relationship
+  - Helps us to predict y for some ungiven x.
+  - Given data points we need to decide where to plot the line
+  - Minimizing the overall distance from points to line (this is called residual error)
+  - Residuals can be both positive and negative
+  - *Ordinary Least square:* minimizing the sum of the squares of the differences between the observed dependend variable in the given dataset and those predicted by the linear function.
+
+** Algorithm discussion for Ordinary Least Square
+   - A simple straight line would be
+     $y = mx + c$
+   - We see that here there is only one room for possible features x.
+   - OLS allows us to directly solve for the slope `m` and intercept `b`
+   - The more generalized form for linear regression for multiple parameters would be something like this
+
+@math
+   y = \beta_0 x_0 + \dots + \beta_n x_n\\
+   y = \sum_{i = 0}^{n} \beta_i x_i
+@end
+

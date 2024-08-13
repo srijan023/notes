@@ -1,0 +1,46 @@
+* Introduction
+
+  Ensuring that the user has access to certain resource.
+  Better way to implement authentication
+  - Give the user back a token on signIn/ signUp
+  - Ask the user to send back the token in all future requests (usually stored in localStorage of browser)
+  - When the user log outs, ask the user to forget the token (or revoke it from the backend)
+
+** Hashing
+   Backend stores the login informations somewhere in the database but the password is not stored as plain text.
+   This is because, people working on the database or the backend should not be able to see the password and it also protects us from hackers
+   The password we use to sign in is again converted to hashed formated and compared with the stored hashed value.
+
+   /Hashing is always one way meaning we can't convert the hashed value to plain text but encryption is two way/
+   /Hashing does not require a password just the hash funciton, encryption requires the password/
+
+*** Salt
+   Asumme you are an employee working at facebook. You are working on the database and you find that the hash for your and Zukerberg's password is the same, you are certain that your's and his password are the same. To solve this problem we use something called `salt`. We add a string of text, mostly random along with the password and then hash it. This changes the hash even if the original password was the same. This `salt` text is also stored in the database along with the hash.
+
+** JSON Web token
+   Takes in JSON as input
+   used in the Web
+   Gives us the token
+   _It is different from encryption and hashing_
+   We can view the example on {https://jwt.io}[jwt]
+   It is similar to a digital signature, anyone can see the signature but verifying the signature requires a password
+
+** Local Storage
+   First we sign in using ID and password
+   The backend compares the hashed password with the stored hashed value and returns us the token in case of a success login in form of JWT
+   This JWT is then stored in the local storage by doing something like
+   @code javascript
+     localStorage.set("Token", jwt);
+   @end
+
+** Validation
+   Now, from here on, any subsequent requests are sent along with this jwt token which is used for user verification with `jwt.verify()` which requires the password.
+   This authorization token is passed as a header with the key `Authorization`
+   If `jwt.verify(json, password)` fails, an exception is sent
+
+
+
+
+
+
+

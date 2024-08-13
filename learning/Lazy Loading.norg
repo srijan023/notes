@@ -1,0 +1,10 @@
+In case of client side routing and creating a single page application, the whole code for entire application arrives to the client side. The whole bundle
+
+However rather than sending the entire app at once, we lazy load the page and send only the required details when they need to be loaded.
+
+The extra syntax for this is
+@code javascript
+  const Dashbaord = React.lazy(()=> import ("./components/Dashboard"))
+@end
+
+For this to work, the component need to be `default` export
